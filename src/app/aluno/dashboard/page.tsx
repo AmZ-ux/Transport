@@ -39,6 +39,25 @@ export default function AlunoDashboardPage() {
     return `https://wa.me/5511999999999?text=${mensagem}`;
   }, []);
 
+  const situacaoAtual = useMemo(() => {
+    if (!stats?.mensalidadeAtual) return '';
+
+    const hoje = new Date();
+    const vencimento = new Date(`${stats.mensalidadeAtual.dataVencimento}T00:00:00`);
+    const diffMs = vencimento.getTime() - hoje.getTime();
+    const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    if (stats.mensalidadeAtual.status === 'atrasado') {
+      const diasAtraso = Math.max(1, Math.abs(diffDias));
+      return `Pagamento em atraso ha ${diasAtraso} dia${diasAtraso > 1 ? 's' : ''}`;
+    }
+
+    if (diffDias === 0) return 'Vence hoje';
+    if (diffDias > 0) return `Vence em ${diffDias} dia${diffDias > 1 ? 's' : ''}`;
+
+    return '';
+  }, [stats?.mensalidadeAtual]);
+
   if (carregando) {
     return (
       <ProtectedRoute tipoRequerido="aluno">
@@ -54,27 +73,58 @@ export default function AlunoDashboardPage() {
       <AlunoLayout>
         <div className="space-y-5">
           <header>
-            <h1 className="pageTitle text-gray-900 dark:text-white">Ola, {usuario?.nome?.split(' ')[0]}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Ola, {usuario?.nome?.split(' ')[0]}</h1>
             <p className="pageSubtitle text-gray-600 dark:text-gray-400">Acompanhe pagamentos, pendencias e comprovantes.</p>
           </header>
 
           {stats?.mensalidadeAtual && stats.mensalidadeAtual.status !== 'pago' ? (
-            <Card className={stats.mensalidadeAtual.status === 'atrasado' ? 'border-rose-300' : 'border-amber-300'}>
-              <CardBody className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Mensalidade atual</h2>
-                  <Badge status={stats.mensalidadeAtual.status} size="sm" />
+            <Card
+              className={`overflow-hidden rounded-3xl border bg-white shadow-md dark:bg-gray-900 ${
+                stats.mensalidadeAtual.status === 'atrasado'
+                  ? 'border-rose-300 shadow-rose-100/70 dark:shadow-rose-950/20'
+                  : 'border-amber-300 shadow-amber-100/60 dark:shadow-amber-950/20'
+              }`}
+            >
+              <CardBody className="space-y-5 p-6 sm:p-7">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">Mensalidade atual</h2>
+                  {stats.mensalidadeAtual.status === 'atrasado' ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-800 dark:border-rose-700 dark:bg-rose-950/70 dark:text-rose-200">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      Atrasado
+                    </span>
+                  ) : (
+                    <Badge status={stats.mensalidadeAtual.status} size="sm" />
+                  )}
                 </div>
-                <p className="valuePrimary text-gray-900 dark:text-white">{formatarValor(stats.mensalidadeAtual.valor)}</p>
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                  <Calendar className="h-4 w-4" />
-                  <span>Vencimento: {formatarData(stats.mensalidadeAtual.dataVencimento)}</span>
+
+                <p className="text-[2.8rem] font-black leading-none tracking-tight text-gray-950 dark:text-white sm:text-[3.2rem]">
+                  {formatarValor(stats.mensalidadeAtual.valor)}
+                </p>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <Calendar className="h-4 w-4" />
+                    <span>Vencimento: {formatarData(stats.mensalidadeAtual.dataVencimento)}</span>
+                  </div>
+                  {situacaoAtual && (
+                    <p
+                      className={`rounded-xl border px-3 py-2 text-sm font-semibold ${
+                        stats.mensalidadeAtual.status === 'atrasado'
+                          ? 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200'
+                          : 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200'
+                      }`}
+                    >
+                      Situacao atual: {situacaoAtual}
+                    </p>
+                  )}
                 </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Button onClick={() => router.push(`/aluno/comprovante/${stats.mensalidadeAtual?.id}`)}>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button className="flex-1 shadow-sm" onClick={() => router.push(`/aluno/comprovante/${stats.mensalidadeAtual?.id}`)}>
                     <Upload className="h-4 w-4" /> Enviar comprovante
                   </Button>
-                  <Button variant="outline" onClick={() => window.open(whatsappLink, '_blank')}>
+                  <Button className="flex-1 border-primary-500 text-primary-700" variant="outline" onClick={() => window.open(whatsappLink, '_blank')}>
                     <MessageCircle className="h-4 w-4" /> Falar no WhatsApp
                   </Button>
                 </div>
@@ -100,23 +150,23 @@ export default function AlunoDashboardPage() {
             />
           )}
 
-          <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Card>
+          <section className="grid grid-cols-1 gap-4 pt-1 sm:grid-cols-3">
+            <Card className="border-gray-200/90 bg-white shadow-sm">
               <CardBody>
-                <p className="text-sm text-gray-500">Total pago</p>
-                <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">{formatarValor(stats?.totalPago || 0)}</p>
+                <p className="text-sm font-semibold text-gray-500">Total pago</p>
+                <p className="text-2xl font-black leading-tight text-emerald-700 dark:text-emerald-300">{formatarValor(stats?.totalPago || 0)}</p>
               </CardBody>
             </Card>
-            <Card>
+            <Card className="border-gray-200/90 bg-white shadow-sm">
               <CardBody>
-                <p className="text-sm text-gray-500">Pendente</p>
-                <p className="text-xl font-bold text-amber-700 dark:text-amber-300">{formatarValor(stats?.totalPendente || 0)}</p>
+                <p className="text-sm font-semibold text-gray-500">Pendente</p>
+                <p className="text-2xl font-black leading-tight text-amber-700 dark:text-amber-300">{formatarValor(stats?.totalPendente || 0)}</p>
               </CardBody>
             </Card>
-            <Card>
+            <Card className="border-gray-200/90 bg-white shadow-sm">
               <CardBody>
-                <p className="text-sm text-gray-500">Atrasado</p>
-                <p className="text-xl font-bold text-rose-700 dark:text-rose-300">{formatarValor(stats?.totalAtrasado || 0)}</p>
+                <p className="text-sm font-semibold text-gray-500">Atrasado</p>
+                <p className="text-2xl font-black leading-tight text-rose-700 dark:text-rose-300">{formatarValor(stats?.totalAtrasado || 0)}</p>
               </CardBody>
             </Card>
           </section>
