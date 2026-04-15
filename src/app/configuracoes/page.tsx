@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Bell, FileText, Lock, Palette, Shield, User } from 'lucide-react';
 import { ProtectedRoute } from '@/components';
+import { AdminBottomNav } from '@/components/admin';
 
 const itens = [
   {
@@ -16,12 +17,12 @@ const itens = [
     icone: Bell,
   },
   {
-    titulo: 'Perfil do admin',
+    titulo: 'Perfil',
     descricao: 'Dados da conta administrativa e preferencias de exibicao.',
     icone: User,
   },
   {
-    titulo: 'Backup e restauracao',
+    titulo: 'Backup',
     descricao: 'Salvamento, importacao e restauracao segura dos dados.',
     icone: Shield,
   },
@@ -42,12 +43,12 @@ export default function ConfiguracoesPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <main className="min-h-screen bg-[#E8EEEC] px-4 pb-8 pt-6 sm:px-5 sm:pt-7">
+      <main className="min-h-screen bg-[#E2E8E5] px-4 pb-24 pt-6 sm:px-5 sm:pt-7">
         <div className="mx-auto w-full max-w-md">
           <header className="mb-5 flex items-center gap-3">
             <button
               onClick={() => router.push('/dashboard')}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-emerald-300 bg-white text-emerald-700 shadow-[0_6px_14px_rgba(15,23,42,0.12)] transition duration-200 hover:scale-105 hover:bg-emerald-50"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-300 bg-white text-gray-800 shadow-[0_6px_14px_rgba(15,23,42,0.12)] transition duration-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
               aria-label="Voltar"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -62,7 +63,7 @@ export default function ConfiguracoesPage() {
               return (
                 <article
                   key={item.titulo}
-                  className="rounded-3xl border border-gray-100 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
+                  className="rounded-3xl border border-gray-200 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
                 >
                   <div className="flex items-start gap-3">
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
@@ -78,6 +79,7 @@ export default function ConfiguracoesPage() {
             })}
           </section>
         </div>
+        <AdminBottomNav />
       </main>
     </ProtectedRoute>
   );

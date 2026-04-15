@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Check, CheckCircle2, Download, TrendingUp } from 'lucide-react';
-import { ProtectedRoute } from '@/components';
+import { Button, ProtectedRoute } from '@/components';
 import { AdminAvatar, AdminBottomNav, AdminStatusPill } from '@/components/admin';
 import { useMensalidades } from '@/hooks/useMensalidades';
 import { FiltrosMensalidade } from '@/types';
@@ -88,24 +88,27 @@ export default function MensalidadesPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <main className="min-h-screen bg-[#E8EEEC] pb-24">
+      <main className="min-h-screen bg-[#E2E8E5] pb-24">
         <div className="mx-auto w-full max-w-md px-4 pb-4 pt-6 sm:px-5 sm:pt-7">
           <header className="mb-4 flex items-start justify-between gap-3">
             <div>
               <h1 className="pageTitle text-gray-900">Pagamentos</h1>
               <p className="pageSubtitle mt-1">{nomeCabecalho}</p>
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 border-emerald-500 bg-white px-3 font-semibold text-emerald-700 shadow-sm hover:bg-emerald-50"
               onClick={exportarPdf}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 text-emerald-700 shadow-sm transition duration-200 hover:scale-105 hover:bg-emerald-100"
               aria-label="Exportar PDF"
               title="Exportar PDF"
             >
               <Download className="h-4 w-4" />
-            </button>
+              PDF
+            </Button>
           </header>
 
-          <div className="no-scrollbar mb-4 grid auto-cols-[clamp(4.2rem,20vw,4.8rem)] grid-flow-col gap-2 overflow-x-auto pb-1 pr-1">
+          <div className="no-scrollbar mb-5 grid auto-cols-[clamp(4.45rem,21vw,5rem)] grid-flow-col gap-2 overflow-x-auto pb-1 pr-1">
             {meses.map((item) => {
               const active = item.mes === selecionado.mes && item.ano === selecionado.ano;
 
@@ -113,20 +116,20 @@ export default function MensalidadesPage() {
                 <button
                   key={`${item.mes}-${item.ano}`}
                   onClick={() => setSelecionado({ mes: item.mes, ano: item.ano })}
-                  className={`h-[clamp(3.25rem,11vw,3.65rem)] rounded-3xl px-2 text-center transition ${
+                  className={`h-[clamp(3.35rem,11vw,3.8rem)] rounded-3xl px-2 text-center transition ${
                     active
                       ? 'bg-emerald-600 text-white shadow-[0_8px_16px_rgba(5,150,105,0.28)]'
                       : 'bg-white text-gray-600 shadow-sm'
                   }`}
                 >
-                  <p className={`text-[10px] font-bold uppercase leading-none ${active ? 'text-emerald-100' : 'text-gray-400'}`}>{item.ano}</p>
-                  <p className="chipLabel mt-1 whitespace-nowrap text-base leading-none">{item.label}</p>
+                  <p className={`text-[9px] font-bold uppercase leading-none ${active ? 'text-emerald-100' : 'text-gray-400'}`}>{item.ano}</p>
+                  <p className="chipLabel mt-1 whitespace-nowrap text-[0.9rem] leading-none">{item.label}</p>
                 </button>
               );
             })}
           </div>
 
-          <article className="mb-4 rounded-[22px] border border-gray-100 bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
+          <article className="mb-5 rounded-[22px] border border-gray-200 bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
@@ -156,7 +159,7 @@ export default function MensalidadesPage() {
               mensalidades.map((item) => (
                 <article
                   key={item.id}
-                  className="rounded-[22px] border border-gray-100 bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.09)] transition duration-200 hover:-translate-y-0.5"
+                  className="rounded-[22px] border border-gray-200 bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.09)] transition duration-200 hover:-translate-y-0.5"
                 >
                   <div className="flex items-center gap-3">
                     <AdminAvatar name={item.aluno?.nome || 'Aluno'} />

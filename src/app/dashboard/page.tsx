@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, BarChart3, Clock3, Settings } from 'lucide-react';
+import { BarChart3, Bell, Clock3, Settings } from 'lucide-react';
 import { ProtectedRoute } from '@/components';
 import { AdminBottomNav } from '@/components/admin';
 import { getDashboardStats } from '@/services/storage';
@@ -57,7 +57,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <main className="min-h-screen bg-[#E8EEEC] pb-24">
+      <main className="min-h-screen bg-[#E2E8E5] pb-24">
         <section className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-b from-emerald-700 to-emerald-600 px-4 pb-10 pt-6 sm:px-5 sm:pt-7">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-6 flex items-center justify-between">

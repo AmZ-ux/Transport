@@ -62,8 +62,8 @@ body {
 
 @layer utilities {
   .pageTitle {
-    font-size: clamp(2rem, 6vw, 2.5rem);
-    line-height: 1.05;
+    font-size: clamp(1.9rem, 6vw, 2.45rem);
+    line-height: 1.02;
     @apply font-black tracking-tight;
   }
 
@@ -73,8 +73,8 @@ body {
   }
 
   .cardTitle {
-    font-size: clamp(1.15rem, 3.8vw, 1.45rem);
-    line-height: 1.15;
+    font-size: clamp(1.1rem, 3.7vw, 1.4rem);
+    line-height: 1.12;
     @apply font-extrabold;
   }
 
@@ -94,7 +94,7 @@ body {
   }
 
   .tabLabel {
-    font-size: clamp(0.68rem, 2.1vw, 0.78rem);
+    font-size: clamp(0.66rem, 2.1vw, 0.76rem);
     @apply font-semibold;
   }
 

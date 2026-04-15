@@ -16,20 +16,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/login/page.js"
     ],
-    "/aluno/dashboard/page": [
+    "/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/aluno/dashboard/page.js"
+      "static/chunks/app/dashboard/page.js"
     ],
-    "/aluno/comprovante/[id]/page": [
+    "/mensalidades/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/aluno/comprovante/[id]/page.js"
-    ],
-    "/aluno/minhas-mensalidades/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/aluno/minhas-mensalidades/page.js"
+      "static/chunks/app/mensalidades/page.js"
     ]
   }
 }

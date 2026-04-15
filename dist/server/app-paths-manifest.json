@@ -1,6 +1,6 @@
 {
+  "/page": "app/page.js",
   "/login/page": "app/login/page.js",
-  "/aluno/dashboard/page": "app/aluno/dashboard/page.js",
-  "/aluno/minhas-mensalidades/page": "app/aluno/minhas-mensalidades/page.js",
-  "/aluno/comprovante/[id]/page": "app/aluno/comprovante/[id]/page.js"
+  "/dashboard/page": "app/dashboard/page.js",
+  "/mensalidades/page": "app/mensalidades/page.js"
 }

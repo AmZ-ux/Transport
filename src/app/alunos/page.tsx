@@ -71,7 +71,7 @@ export default function AlunosPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <main className="min-h-screen bg-[#E8EEEC] pb-24">
+      <main className="min-h-screen bg-[#E2E8E5] pb-24">
         <div className="mx-auto w-full max-w-md px-4 pb-4 pt-6 sm:px-5 sm:pt-7">
           <header className="mb-4 flex items-start justify-between">
             <div>
@@ -141,7 +141,7 @@ export default function AlunosPage() {
               lista.map((aluno) => (
                 <article
                   key={aluno.id}
-                  className="rounded-[22px] border border-gray-100 bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.09)] transition duration-200 hover:-translate-y-0.5"
+                  className="rounded-[22px] border border-gray-200 bg-white px-4 py-3 shadow-[0_8px_20px_rgba(15,23,42,0.09)] transition duration-200 hover:-translate-y-0.5"
                 >
                   <div className="flex items-center gap-3">
                     <AdminAvatar name={aluno.nome} />

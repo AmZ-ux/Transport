@@ -1,5 +1,6 @@
 export { Layout } from './Layout';
 export { AlunoLayout } from './AlunoLayout';
+export { AlunoBottomNav } from './AlunoBottomNav';
 export { ProtectedRoute } from './ProtectedRoute';
 export { Sidebar } from './Sidebar';
 export { AlunoSidebar } from './AlunoSidebar';

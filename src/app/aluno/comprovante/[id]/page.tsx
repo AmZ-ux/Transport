@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Upload, ArrowLeft, FileText, CheckCircle, Image as ImageIcon } from 'lucide-react';
 import { AlunoLayout, ProtectedRoute, Card, CardHeader, CardBody, Button, Input, Loading } from '@/components';
@@ -28,38 +28,36 @@ export default function EnviarComprovantePage() {
     setCarregando(false);
   }, [mensalidadeId]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const voltar = () => router.push('/aluno/minhas-mensalidades');
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validar tipo e tamanho
     const tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     if (!tiposPermitidos.includes(file.type)) {
-      setErro('Tipo de arquivo não suportado. Use JPG, PNG ou PDF.');
+      setErro('Tipo de arquivo nao suportado. Use JPG, PNG ou PDF.');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setErro('Arquivo muito grande. Máximo 5MB.');
+      setErro('Arquivo muito grande. Maximo 5MB.');
       return;
     }
 
     setErro('');
     setArquivo(file);
 
-    // Criar preview para imagens
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
+      reader.onloadend = () => setPreview(reader.result as string);
       reader.readAsDataURL(file);
     } else {
       setPreview(null);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!arquivo) {
@@ -71,20 +69,12 @@ export default function EnviarComprovantePage() {
     setErro('');
 
     try {
-      // Converter arquivo para base64
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
+        const envioOk = enviarComprovante(mensalidadeId, base64, arquivo.name, arquivo.type, observacao);
 
-        const sucesso = enviarComprovante(
-          mensalidadeId,
-          base64,
-          arquivo.name,
-          arquivo.type,
-          observacao
-        );
-
-        if (sucesso) {
+        if (envioOk) {
           setSucesso(true);
         } else {
           setErro('Erro ao enviar comprovante. Tente novamente.');
@@ -93,69 +83,16 @@ export default function EnviarComprovantePage() {
       };
       reader.readAsDataURL(arquivo);
     } catch {
-      setErro('Erro ao processar arquivo. Tente novamente.');
+      setErro('Erro ao processar o arquivo. Tente novamente.');
       setEnviando(false);
     }
   };
 
   if (carregando) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute tipoRequerido="aluno">
         <AlunoLayout>
           <Loading />
-        </AlunoLayout>
-      </ProtectedRoute>
-    );
-  }
-
-  if (!mensalidade) {
-    return (
-      <ProtectedRoute>
-        <AlunoLayout>
-          <div className="max-w-lg mx-auto text-center py-12">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Mensalidade não encontrada</h1>
-            <p className="text-gray-500 mb-4">A mensalidade que você está procurando não existe.</p>
-            <Button onClick={() => router.push('/aluno/minhas-mensalidades')}>Voltar</Button>
-          </div>
-        </AlunoLayout>
-      </ProtectedRoute>
-    );
-  }
-
-  if (sucesso) {
-    return (
-      <ProtectedRoute>
-        <AlunoLayout>
-          <div className="max-w-lg mx-auto">
-            <Button variant="ghost" onClick={() => router.push('/aluno/minhas-mensalidades')} className="mb-4">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Voltar
-            </Button>
-
-            <Card className="text-center">
-              <CardBody className="p-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-2xl mb-4">
-                  <CheckCircle className="h-8 w-8 text-green-600" />
-                </div>
-
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Comprovante Enviado!</h1>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Seu comprovante foi enviado com sucesso. O administrador irá revisar e confirmar o pagamento em breve.
-                </p>
-
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6">
-                  <p className="text-sm text-blue-800 dark:text-blue-300">
-                    <strong>Mensalidade:</strong> {mensalidade.mesReferencia}/{mensalidade.anoReferencia}<br />
-                    <strong>Valor:</strong> {formatarValor(mensalidade.valor)}
-                  </p>
-                </div>
-
-                <Button onClick={() => router.push('/aluno/minhas-mensalidades')} className="w-full">
-                  Ver Minhas Mensalidades
-                </Button>
-              </CardBody>
-            </Card>
-          </div>
         </AlunoLayout>
       </ProtectedRoute>
     );
@@ -164,110 +101,139 @@ export default function EnviarComprovantePage() {
   return (
     <ProtectedRoute tipoRequerido="aluno">
       <AlunoLayout>
-        <div className="max-w-xl mx-auto">
-          <Button variant="ghost" onClick={() => router.push('/aluno/minhas-mensalidades')} className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
-          </Button>
+        <div className="mx-auto w-full max-w-xl space-y-4">
+          <header className="flex items-center gap-3">
+            <button
+              onClick={voltar}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-300 bg-white text-gray-800 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+              aria-label="Voltar"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <div>
+              <h1 className="cardTitle text-gray-900 dark:text-white">Enviar comprovante</h1>
+              <p className="pageSubtitle text-gray-600 dark:text-gray-400">Envie o comprovante do pagamento.</p>
+            </div>
+          </header>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Upload className="h-6 w-6 text-primary-600" />
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">Enviar Comprovante</h1>
-                  <p className="text-sm text-gray-500">Envie o comprovante do pagamento</p>
+          {!mensalidade ? (
+            <Card className="border-gray-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
+              <CardBody className="space-y-4 text-center">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Mensalidade nao encontrada</h2>
+                <p className="text-gray-500">A mensalidade informada nao existe ou foi removida.</p>
+                <Button onClick={voltar}>Voltar</Button>
+              </CardBody>
+            </Card>
+          ) : sucesso ? (
+            <Card className="border-gray-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
+              <CardBody className="space-y-5 p-6 text-center">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                  <CheckCircle className="h-8 w-8" />
                 </div>
-              </div>
-            </CardHeader>
+                <div>
+                  <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">Comprovante enviado</h2>
+                  <p className="mt-2 text-gray-600 dark:text-gray-400">
+                    O administrador vai revisar e confirmar o pagamento em breve.
+                  </p>
+                </div>
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-left text-sm text-blue-900 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
+                  <p><strong>Mensalidade:</strong> {mensalidade.mesReferencia}/{mensalidade.anoReferencia}</p>
+                  <p><strong>Valor:</strong> {formatarValor(mensalidade.valor)}</p>
+                </div>
+                <Button className="w-full" onClick={voltar}>
+                  Ver minhas mensalidades
+                </Button>
+              </CardBody>
+            </Card>
+          ) : (
+            <Card className="border-gray-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
+              <CardHeader>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Dados da mensalidade</h2>
+              </CardHeader>
 
-            <CardBody>
-              {/* Resumo da Mensalidade */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-2">Mensalidade</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Mês/Ano</p>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {mensalidade.mesReferencia}/{mensalidade.anoReferencia}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Valor</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{formatarValor(mensalidade.valor)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Vencimento</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{formatarData(mensalidade.dataVencimento)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Status</p>
-                    <p className="font-medium capitalize">{mensalidade.status}</p>
+              <CardBody className="space-y-6">
+                <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500">Mes/Ano</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {mensalidade.mesReferencia}/{mensalidade.anoReferencia}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Valor</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{formatarValor(mensalidade.valor)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Vencimento</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{formatarData(mensalidade.dataVencimento)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Status</p>
+                      <p className="font-semibold capitalize text-gray-900 dark:text-white">{mensalidade.status}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {erro && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600">{erro}</div>
-              )}
+                {erro && (
+                  <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-700">
+                    {erro}
+                  </div>
+                )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Upload de Arquivo */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Comprovante (imagem ou PDF) *
-                  </label>
-                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center hover:border-primary-500 transition-colors">
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/jpg,application/pdf"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      id="comprovante"
-                      required
-                    />
-                    <label htmlFor="comprovante" className="cursor-pointer">
-                      {preview ? (
-                        <img src={preview} alt="Preview" className="max-h-48 mx-auto rounded-lg" />
-                      ) : arquivo ? (
-                        <div className="flex items-center justify-center gap-2 text-gray-600">
-                          <FileText className="h-8 w-8" />
-                          <span>{arquivo.name}</span>
-                        </div>
-                      ) : (
-                        <div className="text-gray-500">
-                          <ImageIcon className="h-12 w-12 mx-auto mb-2" />
-                          <p className="font-medium">Clique para selecionar o comprovante</p>
-                          <p className="text-sm">JPG, PNG ou PDF (máx. 5MB)</p>
-                        </div>
-                      )}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Comprovante (imagem ou PDF) *
                     </label>
+                    <div className="rounded-xl border-2 border-dashed border-gray-300 p-6 text-center transition hover:border-primary-500 dark:border-gray-700">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/jpg,application/pdf"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="comprovante"
+                        required
+                      />
+                      <label htmlFor="comprovante" className="cursor-pointer">
+                        {preview ? (
+                          <img src={preview} alt="Preview do comprovante" className="mx-auto max-h-48 rounded-lg" />
+                        ) : arquivo ? (
+                          <div className="flex items-center justify-center gap-2 text-gray-600">
+                            <FileText className="h-8 w-8" />
+                            <span className="break-all">{arquivo.name}</span>
+                          </div>
+                        ) : (
+                          <div className="text-gray-500">
+                            <ImageIcon className="mx-auto mb-2 h-12 w-12" />
+                            <p className="font-medium">Clique para selecionar o comprovante</p>
+                            <p className="text-sm">JPG, PNG ou PDF (max. 5MB)</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
                   </div>
-                </div>
 
-                {/* Observação */}
-                <div>
                   <Input
-                    label="Observação (opcional)"
+                    label="Observacao (opcional)"
                     value={observacao}
                     onChange={(e) => setObservacao(e.target.value)}
                     placeholder="Ex: Paguei via PIX no dia X"
                   />
-                </div>
 
-                {/* Botões */}
-                <div className="flex gap-3 pt-4">
-                  <Button type="button" variant="ghost" onClick={() => router.push('/aluno/minhas-mensalidades')}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" variant="primary" loading={enviando} className="flex-1">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Enviar Comprovante
-                  </Button>
-                </div>
-              </form>
-            </CardBody>
-          </Card>
+                  <div className="flex gap-3 pt-2">
+                    <Button type="button" variant="outline" onClick={voltar}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" loading={enviando} className="flex-1">
+                      <Upload className="h-4 w-4" />
+                      Enviar comprovante
+                    </Button>
+                  </div>
+                </form>
+              </CardBody>
+            </Card>
+          )}
         </div>
       </AlunoLayout>
     </ProtectedRoute>

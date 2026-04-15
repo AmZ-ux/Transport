@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { AlunoFormSteps, Card, CardBody, CardHeader, ProtectedRoute } from '@/components';
+import { AdminBottomNav } from '@/components/admin';
 import { useAlunos } from '@/hooks/useAlunos';
 
 export default function NovoAlunoPage() {
@@ -50,21 +51,24 @@ export default function NovoAlunoPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <main className="min-h-screen bg-[#E8EEEC] px-4 pb-8 pt-6 sm:px-5">
+      <main className="min-h-screen bg-[#E2E8E5] px-4 pb-24 pt-6 sm:px-5">
         <div className="mx-auto w-full max-w-2xl space-y-4">
-          <button
-            onClick={() => router.push('/alunos')}
-            className="inline-flex h-11 items-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 text-sm font-semibold text-emerald-700 shadow-[0_6px_14px_rgba(15,23,42,0.10)] transition duration-200 hover:bg-emerald-50"
-          >
-            <ArrowLeft className="h-4 w-4" /> Voltar
-          </button>
+          <header className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/alunos')}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-300 bg-white text-gray-800 shadow-[0_6px_14px_rgba(15,23,42,0.10)] transition duration-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+              aria-label="Voltar"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <h1 className="pageTitle text-gray-900">Novo aluno</h1>
+          </header>
 
-          <Card>
+          <Card className="border-gray-200 shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <UserPlus className="h-6 w-6 text-primary-600" />
                 <div>
-                  <h1 className="cardTitle text-gray-900">Novo aluno</h1>
                   <p className="pageSubtitle mt-1">Cadastro rapido em 3 etapas.</p>
                 </div>
               </div>
@@ -77,6 +81,7 @@ export default function NovoAlunoPage() {
             </CardBody>
           </Card>
         </div>
+        <AdminBottomNav />
       </main>
     </ProtectedRoute>
   );

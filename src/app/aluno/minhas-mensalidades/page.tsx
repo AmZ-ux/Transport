@@ -31,7 +31,7 @@ export default function MinhasMensalidadesPage() {
   const { usuario } = useAuth();
 
   const [carregando, setCarregando] = useState(true);
-  const [mensalidades, setMensalidades] = useState<Mensalidade[]>([]);
+  const [mensalidadesBase, setMensalidadesBase] = useState<Mensalidade[]>([]);
   const [filtroStatus, setFiltroStatus] = useState<StatusMensalidade | ''>('');
 
   useEffect(() => {
@@ -39,31 +39,33 @@ export default function MinhasMensalidadesPage() {
 
     const aluno = getAlunoPorUsuarioId(usuario.id);
     if (!aluno) {
-      setMensalidades([]);
+      setMensalidadesBase([]);
       setCarregando(false);
       return;
     }
 
-    let dados = filtrarMensalidades({ alunoId: aluno.id });
-    if (filtroStatus) {
-      dados = dados.filter((item) => item.status === filtroStatus);
-    }
+    const dados = filtrarMensalidades({ alunoId: aluno.id });
 
     dados.sort((a, b) => {
       if (b.anoReferencia !== a.anoReferencia) return b.anoReferencia - a.anoReferencia;
       return b.mesReferencia - a.mesReferencia;
     });
 
-    setMensalidades(dados);
+    setMensalidadesBase(dados);
     setCarregando(false);
-  }, [usuario?.id, filtroStatus]);
+  }, [usuario?.id]);
+
+  const mensalidades = useMemo(() => {
+    if (!filtroStatus) return mensalidadesBase;
+    return mensalidadesBase.filter((item) => item.status === filtroStatus);
+  }, [mensalidadesBase, filtroStatus]);
 
   const totalPendente = useMemo(
     () =>
-      mensalidades
+      mensalidadesBase
         .filter((item) => item.status === 'pendente' || item.status === 'atrasado')
         .reduce((acc, item) => acc + item.valor, 0),
-    [mensalidades]
+    [mensalidadesBase]
   );
 
   const whatsappLink = useMemo(() => {
@@ -86,15 +88,12 @@ export default function MinhasMensalidadesPage() {
       <AlunoLayout>
         <div className="space-y-5">
           <header>
-            <div className="flex items-center gap-2">
-              <Receipt className="h-6 w-6 text-primary-600" />
-              <h1 className="pageTitle text-gray-900 dark:text-white">Minhas mensalidades</h1>
-            </div>
+            <h1 className="pageTitle text-gray-900 dark:text-white">Minhas mensalidades</h1>
             <p className="pageSubtitle text-gray-600 dark:text-gray-400">Acompanhe historico e status de pagamento.</p>
           </header>
 
           {totalPendente > 0 && (
-            <Card className="border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/20">
+            <Card className="border-amber-200 bg-white shadow-[0_10px_24px_rgba(15,23,42,0.10)] dark:border-amber-900 dark:bg-amber-950/20">
               <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold text-amber-900 dark:text-amber-100">Total em aberto: {formatarValor(totalPendente)}</p>
@@ -110,7 +109,7 @@ export default function MinhasMensalidadesPage() {
           <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
             {STATUS_OPTIONS.map((opt) => {
               const ativo = (!filtroStatus && opt.value === '') || filtroStatus === opt.value;
-              const qtd = opt.value ? mensalidades.filter((item) => item.status === opt.value).length : mensalidades.length;
+              const qtd = opt.value ? mensalidadesBase.filter((item) => item.status === opt.value).length : mensalidadesBase.length;
 
               return (
                 <button
@@ -128,10 +127,16 @@ export default function MinhasMensalidadesPage() {
             })}
           </div>
 
-          {!mensalidades.length ? (
+          {!mensalidadesBase.length ? (
             <EmptyState
               title="Nenhuma mensalidade encontrada"
               description="Aguarde a configuracao do administrador."
+              icon={<Receipt className="h-12 w-12 text-gray-400" />}
+            />
+          ) : !mensalidades.length ? (
+            <EmptyState
+              title="Nenhum resultado para este filtro"
+              description="Troque o filtro para visualizar outras mensalidades."
               icon={<Receipt className="h-12 w-12 text-gray-400" />}
             />
           ) : (

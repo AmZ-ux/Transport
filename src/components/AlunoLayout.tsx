@@ -1,31 +1,24 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { AlunoSidebar } from './AlunoSidebar';
 import { useAuth } from '@/hooks/useAuth';
-import { useNotificacoes } from '@/hooks/useNotificacoes';
+import { AlunoBottomNav } from './AlunoBottomNav';
 
 interface AlunoLayoutProps {
   children: ReactNode;
 }
 
 export function AlunoLayout({ children }: AlunoLayoutProps) {
-  const { usuario, logout } = useAuth();
-  const { naoLidas } = useNotificacoes(usuario?.id);
+  const { logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <AlunoSidebar
-        onLogout={logout}
-        usuarioNome={usuario?.nome}
-        usuarioId={usuario?.id}
-        notificacoesNaoLidas={naoLidas}
-      />
-      <main className="lg:ml-64 min-h-screen">
-        <div className="p-4 lg:p-8">
+    <div className="min-h-screen bg-[#E2E8E5] pb-24 dark:bg-gray-950">
+      <main className="min-h-screen">
+        <div className="mx-auto w-full max-w-md px-4 pb-6 pt-6 sm:px-5 sm:pt-7">
           {children}
         </div>
       </main>
+      <AlunoBottomNav onLogout={logout} />
     </div>
   );
 }
