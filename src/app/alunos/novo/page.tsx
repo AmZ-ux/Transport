@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, UserPlus } from 'lucide-react';
-import { AlunoFormSteps, Button, Card, CardBody, CardHeader, Layout, ProtectedRoute } from '@/components';
+import { AlunoFormSteps, Card, CardBody, CardHeader, ProtectedRoute } from '@/components';
 import { useAlunos } from '@/hooks/useAlunos';
 
 export default function NovoAlunoPage() {
@@ -50,19 +50,22 @@ export default function NovoAlunoPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <Layout>
-        <div className="mx-auto max-w-2xl space-y-4">
-          <Button variant="ghost" onClick={() => router.push('/alunos')}>
+      <main className="min-h-screen bg-[#EEF2F1] px-4 pb-8 pt-6">
+        <div className="mx-auto w-full max-w-2xl space-y-4">
+          <button
+            onClick={() => router.push('/alunos')}
+            className="inline-flex h-11 items-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 text-sm font-semibold text-emerald-700 shadow-[0_6px_14px_rgba(15,23,42,0.10)] transition duration-200 hover:bg-emerald-50"
+          >
             <ArrowLeft className="h-4 w-4" /> Voltar
-          </Button>
+          </button>
 
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <UserPlus className="h-6 w-6 text-primary-600" />
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">Novo aluno</h1>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Cadastro rapido em 3 etapas.</p>
+                  <h1 className="cardTitle text-gray-900">Novo aluno</h1>
+                  <p className="pageSubtitle mt-1">Cadastro rapido em 3 etapas.</p>
                 </div>
               </div>
             </CardHeader>
@@ -74,8 +77,7 @@ export default function NovoAlunoPage() {
             </CardBody>
           </Card>
         </div>
-      </Layout>
+      </main>
     </ProtectedRoute>
   );
 }
-

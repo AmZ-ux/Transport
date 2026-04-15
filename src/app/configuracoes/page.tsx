@@ -44,15 +44,15 @@ export default function ConfiguracoesPage() {
     <ProtectedRoute tipoRequerido="admin">
       <main className="min-h-screen bg-[#EEF2F1] px-4 pb-8 pt-7">
         <div className="mx-auto w-full max-w-md">
-          <header className="mb-5 flex items-center justify-between">
-            <h1 className="pageTitle text-gray-900">Configuracoes</h1>
+          <header className="mb-5 flex items-center gap-3">
             <button
               onClick={() => router.push('/dashboard')}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm transition duration-200 hover:scale-105"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-emerald-300 bg-white text-emerald-700 shadow-[0_6px_14px_rgba(15,23,42,0.12)] transition duration-200 hover:scale-105 hover:bg-emerald-50"
               aria-label="Voltar"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
+            <h1 className="pageTitle text-gray-900">Configuracoes</h1>
           </header>
 
           <section className="space-y-3">

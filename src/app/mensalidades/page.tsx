@@ -105,7 +105,7 @@ export default function MensalidadesPage() {
             </button>
           </header>
 
-          <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+          <div className="mb-4 grid auto-cols-[74px] grid-flow-col gap-2 overflow-x-auto pb-1 pr-1">
             {meses.map((item) => {
               const active = item.mes === selecionado.mes && item.ano === selecionado.ano;
 
@@ -113,14 +113,14 @@ export default function MensalidadesPage() {
                 <button
                   key={`${item.mes}-${item.ano}`}
                   onClick={() => setSelecionado({ mes: item.mes, ano: item.ano })}
-                  className={`min-w-[68px] rounded-3xl px-3 py-2 text-center transition ${
+                  className={`h-[58px] rounded-3xl px-2 text-center transition ${
                     active
                       ? 'bg-emerald-600 text-white shadow-[0_8px_16px_rgba(5,150,105,0.28)]'
                       : 'bg-white text-gray-600 shadow-sm'
                   }`}
                 >
-                  <p className="text-[10px] font-bold uppercase text-gray-400">{item.ano}</p>
-                  <p className="chipLabel text-base">{item.label}</p>
+                  <p className={`text-[10px] font-bold uppercase leading-none ${active ? 'text-emerald-100' : 'text-gray-400'}`}>{item.ano}</p>
+                  <p className="chipLabel mt-1 whitespace-nowrap text-base leading-none">{item.label}</p>
                 </button>
               );
             })}

@@ -58,7 +58,7 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute tipoRequerido="admin">
       <main className="min-h-screen bg-[#EEF2F1] pb-24">
-        <section className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-b from-emerald-700 to-emerald-600 px-4 pb-14 pt-7">
+        <section className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-b from-emerald-700 to-emerald-600 px-4 pb-10 pt-7">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-6 flex items-center justify-between">
               <h1 className="pageTitle text-white">Painel Admin</h1>
@@ -102,7 +102,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <div className="mx-auto -mt-9 w-full max-w-md space-y-5 px-4">
+        <div className="mx-auto mt-4 w-full max-w-md space-y-5 px-4">
           <section>
             <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-gray-500">Acoes do administrador</h2>
             <div className="space-y-3">
