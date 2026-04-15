@@ -30,7 +30,7 @@ export function AdminBottomNav() {
               <Link
                 href={item.href}
                 className={`flex flex-col items-center justify-center rounded-xl py-2 text-xs font-semibold transition duration-200 ${
-                  active ? 'text-emerald-700' : 'text-gray-400'
+                  active ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'text-gray-400'
                 }`}
               >
                 <Icon className={`mb-1 h-5 w-5 ${active ? 'text-emerald-600' : 'text-gray-400'}`} />

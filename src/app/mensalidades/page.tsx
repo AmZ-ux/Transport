@@ -105,7 +105,7 @@ export default function MensalidadesPage() {
             </button>
           </header>
 
-          <div className="mb-4 grid auto-cols-[74px] grid-flow-col gap-2 overflow-x-auto pb-1 pr-1">
+          <div className="no-scrollbar mb-4 grid auto-cols-[74px] grid-flow-col gap-2 overflow-x-auto pb-1 pr-1">
             {meses.map((item) => {
               const active = item.mes === selecionado.mes && item.ano === selecionado.ano;
 

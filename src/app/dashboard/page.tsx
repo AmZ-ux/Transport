@@ -57,7 +57,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <main className="min-h-screen bg-[#EEF2F1] pb-24">
+      <main className="min-h-screen bg-[#E8EEEC] pb-24">
         <section className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-b from-emerald-700 to-emerald-600 px-4 pb-10 pt-7">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-6 flex items-center justify-between">
