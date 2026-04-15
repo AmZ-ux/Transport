@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, Bus, BarChart3, Clock3, Settings } from 'lucide-react';
-import { ProtectedRoute, Button } from '@/components';
+import { ProtectedRoute } from '@/components';
 import { AdminBottomNav } from '@/components/admin';
 import { getDashboardStats } from '@/services/storage';
 import { formatarValor } from '@/lib/utils';
@@ -73,8 +73,8 @@ export default function DashboardPage() {
                   <Bus className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-sm font-medium text-emerald-100">{saudacaoPorHora()} 👋</p>
-                  <h1 className="text-3xl font-extrabold text-white">Painel Admin</h1>
+                  <p className="pageSubtitle text-emerald-100">{saudacaoPorHora()} 👋</p>
+                  <h1 className="pageTitle text-white">Painel Admin</h1>
                 </div>
               </div>
               <button className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/70 text-white transition duration-200 hover:scale-105">
@@ -86,8 +86,8 @@ export default function DashboardPage() {
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-bold tracking-[0.22em] text-gray-500">{nomeMes}</p>
-                  <p className="mt-1 text-[42px] font-black leading-none text-gray-950">{formatarValor(stats.totalRecebido)}</p>
-                  <p className="mt-2 text-sm font-medium text-gray-500">de {formatarValor(stats.totalReceberMes)} esperado</p>
+                  <p className="valuePrimary mt-1 text-gray-950">{formatarValor(stats.totalRecebido)}</p>
+                  <p className="valueSecondary mt-2">de {formatarValor(stats.totalReceberMes)} esperado</p>
                 </div>
                 <div className="text-center">
                   <ProgressCircle value={pagos} total={total} />
@@ -160,36 +160,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </button>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-gray-500">Gestao</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={() => router.push('/alunos')} className="justify-start rounded-3xl bg-emerald-600 px-5 py-5 text-left text-white shadow-md hover:bg-emerald-700">
-                <span>
-                  <span className="block text-xl font-bold">Passageiros</span>
-                  <span className="block text-sm text-emerald-100">{stats.quantidadeAlunosAtivos} cadastrados</span>
-                </span>
-              </Button>
-
-              <Button onClick={() => router.push('/mensalidades')} variant="ghost" className="justify-start rounded-3xl border border-gray-200 bg-white px-5 py-5 text-left shadow-sm">
-                <span>
-                  <span className="block text-xl font-bold text-gray-900">Pagamentos</span>
-                  <span className="block text-sm text-gray-500">{pagos}/{total} pagos</span>
-                </span>
-              </Button>
-
-              <Button onClick={() => router.push('/alunos/novo')} variant="ghost" className="justify-start rounded-3xl border border-gray-200 bg-white px-5 py-5 text-left shadow-sm">
-                <span className="text-lg font-bold text-gray-900">Novo passageiro</span>
-              </Button>
-
-              <Button onClick={() => router.push('/cadastro')} variant="ghost" className="justify-start rounded-3xl border border-gray-200 bg-white px-5 py-5 text-left shadow-sm">
-                <span>
-                  <span className="block text-xl font-bold text-gray-900">Portal</span>
-                  <span className="block text-sm text-gray-500">Area do passageiro</span>
-                </span>
-              </Button>
             </div>
           </section>
         </div>

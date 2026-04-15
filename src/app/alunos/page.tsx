@@ -75,8 +75,8 @@ export default function AlunosPage() {
         <div className="mx-auto w-full max-w-md px-4 pb-4 pt-7">
           <header className="mb-4 flex items-start justify-between">
             <div>
-              <h1 className="text-4xl font-black tracking-tight text-gray-900">Passageiros</h1>
-              <p className="mt-1 text-sm font-semibold text-gray-500">{alunosComStatus.length} cadastrados</p>
+              <h1 className="pageTitle text-gray-900">Passageiros</h1>
+              <p className="pageSubtitle mt-1">{alunosComStatus.length} cadastrados</p>
             </div>
             <button
               onClick={() => router.push('/alunos/novo')}
@@ -105,7 +105,7 @@ export default function AlunosPage() {
                 <button
                   key={inst}
                   onClick={() => setInstFiltro(inst)}
-                  className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-bold transition ${
+                  className={`chipLabel whitespace-nowrap rounded-full px-3 py-2 transition ${
                     active ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-gray-600'
                   }`}
                 >
@@ -124,7 +124,7 @@ export default function AlunosPage() {
                 <button
                   key={chip.label}
                   onClick={() => setStatusFiltro(chip.value)}
-                  className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-bold transition ${
+                  className={`chipLabel whitespace-nowrap rounded-full px-3 py-2 transition ${
                     active ? 'bg-gray-900 text-white' : 'bg-white text-gray-600'
                   }`}
                 >
@@ -150,7 +150,7 @@ export default function AlunosPage() {
                       <p className="truncate text-xl font-extrabold text-gray-900">{aluno.nome}</p>
                       <p className="text-sm font-medium text-gray-500">{formatarTelefone(aluno.telefone)}</p>
                       <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">• {aluno.faculdade.toUpperCase()}</p>
-                      <p className="text-sm font-extrabold text-emerald-700">{formatarValor(aluno.valorMensalidade)}/mes</p>
+                      <p className="valueSecondary text-emerald-700">{formatarValor(aluno.valorMensalidade)}/mes</p>
                     </div>
 
                     <div className="self-start pt-1">
@@ -165,13 +165,6 @@ export default function AlunosPage() {
             )}
           </section>
         </div>
-
-        <button
-          onClick={() => router.push('/alunos/novo')}
-          className="fixed bottom-24 right-5 inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_10px_24px_rgba(5,150,105,0.35)] transition duration-200 hover:scale-105 md:hidden"
-        >
-          <Plus className="h-7 w-7" />
-        </button>
 
         <AdminBottomNav />
       </main>

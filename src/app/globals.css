@@ -59,3 +59,37 @@ body {
   background: #475569;
 }
 
+@layer utilities {
+  .pageTitle {
+    @apply text-4xl font-black tracking-tight;
+  }
+
+  .pageSubtitle {
+    @apply text-sm font-semibold text-gray-500;
+  }
+
+  .cardTitle {
+    @apply text-lg font-extrabold;
+  }
+
+  .valuePrimary {
+    @apply text-[38px] font-black leading-none;
+  }
+
+  .valueSecondary {
+    @apply text-sm font-semibold;
+  }
+
+  .badgeText {
+    @apply text-xs font-semibold;
+  }
+
+  .tabLabel {
+    @apply text-xs font-semibold;
+  }
+
+  .chipLabel {
+    @apply text-xs font-bold;
+  }
+}
+

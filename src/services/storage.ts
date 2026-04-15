@@ -28,6 +28,8 @@ const KEYS = {
   CONFIG: 'transporte_config',
 } as const;
 
+const ADMIN_EMAILS = ['admin@transporte.com', 'toinzim838@gmail.com'];
+
 // ==================== ALUNOS ====================
 
 export function getAlunos(): Aluno[] {
@@ -398,7 +400,16 @@ export function logout(): void {
 export function getUsuarioLogado(): Usuario | null {
   if (typeof window === 'undefined') return null;
   const data = localStorage.getItem(KEYS.USUARIO_LOGADO);
-  return data ? JSON.parse(data) : null;
+  if (!data) return null;
+
+  const usuarioSessao: Usuario = JSON.parse(data);
+  const usuarioAtual = getUsuarios().find(u => u.id === usuarioSessao.id) || usuarioSessao;
+
+  if (usuarioAtual.tipo !== usuarioSessao.tipo) {
+    localStorage.setItem(KEYS.USUARIO_LOGADO, JSON.stringify(usuarioAtual));
+  }
+
+  return usuarioAtual;
 }
 
 export function estaAutenticado(): boolean {
@@ -418,19 +429,41 @@ export function isAluno(): boolean {
 // Usuario padrao (para primeiro acesso)
 export function criarUsuarioPadrao(): void {
   const usuarios = getUsuarios();
-  const temAdmin = usuarios.some(u => u.tipo === 'admin');
+  const adminPadraoEmail = 'admin@transporte.com';
+  const adminPadrao = usuarios.find(u => u.email === adminPadraoEmail);
 
-  if (!temAdmin) {
-    const usuarioPadrao: Usuario = {
+  if (!adminPadrao) {
+    salvarUsuario({
       id: gerarId(),
       nome: 'Administrador',
-      email: 'admin@transporte.com',
+      email: adminPadraoEmail,
       senha: 'admin123',
       tipo: 'admin',
       dataCadastro: new Date().toISOString(),
       ativo: true,
-    };
-    salvarUsuario(usuarioPadrao);
+    });
+    return;
+  }
+
+  if (adminPadrao.tipo !== 'admin') {
+    salvarUsuario({ ...adminPadrao, tipo: 'admin' });
+  }
+}
+
+function garantirAdminsPorEmail(): void {
+  const usuarios = getUsuarios();
+  let houveAtualizacao = false;
+
+  const atualizados = usuarios.map(usuario => {
+    if (ADMIN_EMAILS.includes(usuario.email.toLowerCase()) && usuario.tipo !== 'admin') {
+      houveAtualizacao = true;
+      return { ...usuario, tipo: 'admin' as const };
+    }
+    return usuario;
+  });
+
+  if (houveAtualizacao) {
+    localStorage.setItem(KEYS.USUARIOS, JSON.stringify(atualizados));
   }
 }
 
@@ -466,6 +499,7 @@ export function getUsuarioPorId(id: string): Usuario | null {
 export function inicializarDados(): void {
   if (typeof window === 'undefined') return;
   criarUsuarioPadrao();
+  garantirAdminsPorEmail();
   gerarMensalidadesMes();
 }
 

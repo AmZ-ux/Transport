@@ -1,12 +1,14 @@
 ﻿'use client';
 
 import { useMemo, useState } from 'react';
-import { Check, CheckCircle2, TrendingUp } from 'lucide-react';
+import { Check, CheckCircle2, Download, TrendingUp } from 'lucide-react';
 import { ProtectedRoute } from '@/components';
 import { AdminAvatar, AdminBottomNav, AdminStatusPill } from '@/components/admin';
 import { useMensalidades } from '@/hooks/useMensalidades';
 import { FiltrosMensalidade } from '@/types';
 import { formatarData, formatarValor, nomeMes } from '@/lib/utils';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 function gerarMesesBase() {
   const hoje = new Date();
@@ -42,7 +44,9 @@ export default function MensalidadesPage() {
   const resumo = useMemo(() => {
     const totalPago = mensalidades.filter((m) => m.status === 'pago').reduce((acc, cur) => acc + cur.valor, 0);
     const pagos = mensalidades.filter((m) => m.status === 'pago').length;
-    return { totalPago, pagos, total: mensalidades.length };
+    const pendentes = mensalidades.filter((m) => m.status === 'pendente').length;
+    const atrasados = mensalidades.filter((m) => m.status === 'atrasado').length;
+    return { totalPago, pagos, pendentes, atrasados, total: mensalidades.length };
   }, [mensalidades]);
 
   const nomeCabecalho = `${nomeMes(selecionado.mes)} ${selecionado.ano}`;
@@ -53,13 +57,52 @@ export default function MensalidadesPage() {
     window.setTimeout(() => setFeedback(''), 1800);
   };
 
+  const exportarPdf = () => {
+    const doc = new jsPDF();
+    const tituloMes = `${nomeMes(selecionado.mes)} ${selecionado.ano}`;
+
+    doc.setFontSize(16);
+    doc.text('Relatorio Mensal de Pagamentos', 14, 16);
+    doc.setFontSize(11);
+    doc.text(`Mes/Ano: ${tituloMes}`, 14, 24);
+    doc.text(`Valor recebido: ${formatarValor(resumo.totalPago)}`, 14, 30);
+    doc.text(`Total de passageiros: ${resumo.total}`, 14, 36);
+    doc.text(`Pagos: ${resumo.pagos} | Pendentes: ${resumo.pendentes} | Atrasados: ${resumo.atrasados}`, 14, 42);
+
+    autoTable(doc, {
+      startY: 48,
+      head: [['Nome', 'Valor', 'Vencimento', 'Status', 'Data pagamento']],
+      body: mensalidades.map((item) => [
+        item.aluno?.nome || 'Aluno',
+        formatarValor(item.valor),
+        formatarData(item.dataVencimento),
+        item.status,
+        item.dataPagamento ? formatarData(item.dataPagamento) : '-',
+      ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [5, 150, 105] },
+    });
+
+    doc.save(`relatorio-${selecionado.ano}-${String(selecionado.mes).padStart(2, '0')}.pdf`);
+  };
+
   return (
     <ProtectedRoute tipoRequerido="admin">
       <main className="min-h-screen bg-[#EEF2F1] pb-24">
         <div className="mx-auto w-full max-w-md px-4 pb-4 pt-7">
-          <header className="mb-4">
-            <h1 className="text-4xl font-black tracking-tight text-gray-900">Pagamentos</h1>
-            <p className="mt-1 text-sm font-semibold text-gray-500">{nomeCabecalho}</p>
+          <header className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h1 className="pageTitle text-gray-900">Pagamentos</h1>
+              <p className="pageSubtitle mt-1">{nomeCabecalho}</p>
+            </div>
+            <button
+              onClick={exportarPdf}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition duration-200 hover:scale-105 hover:text-emerald-700"
+              aria-label="Exportar PDF"
+              title="Exportar PDF"
+            >
+              <Download className="h-4 w-4" />
+            </button>
           </header>
 
           <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
@@ -77,7 +120,7 @@ export default function MensalidadesPage() {
                   }`}
                 >
                   <p className="text-[10px] font-bold uppercase text-gray-400">{item.ano}</p>
-                  <p className="text-base font-bold">{item.label}</p>
+                  <p className="chipLabel text-base">{item.label}</p>
                 </button>
               );
             })}
@@ -91,7 +134,7 @@ export default function MensalidadesPage() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-gray-500">Recebido</p>
-                  <p className="text-[38px] font-black leading-none text-gray-900">{formatarValor(resumo.totalPago)}</p>
+                  <p className="valuePrimary text-gray-900">{formatarValor(resumo.totalPago)}</p>
                 </div>
               </div>
               <div className="text-right">

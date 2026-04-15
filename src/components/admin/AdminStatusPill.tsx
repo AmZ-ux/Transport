@@ -40,7 +40,7 @@ export function AdminStatusPill({ status, compact = false }: AdminStatusPillProp
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full font-semibold ${cfg.className} ${
-        compact ? 'px-2 py-1 text-xs' : 'px-2.5 py-1 text-sm'
+        compact ? 'px-2 py-1 badgeText' : 'px-2.5 py-1 text-sm'
       }`}
     >
       {cfg.icon}

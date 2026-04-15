@@ -534,9 +534,6 @@ video {
 .bottom-0 {
   bottom: 0px;
 }
-.bottom-24 {
-  bottom: 6rem;
-}
 .left-0 {
   left: 0px;
 }
@@ -545,9 +542,6 @@ video {
 }
 .right-0 {
   right: 0px;
-}
-.right-5 {
-  right: 1.25rem;
 }
 .top-0 {
   top: 0px;
@@ -843,9 +837,6 @@ video {
 .grid-cols-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-.grid-cols-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
 .flex-col {
   flex-direction: column;
 }
@@ -860,9 +851,6 @@ video {
 }
 .items-center {
   align-items: center;
-}
-.justify-start {
-  justify-content: flex-start;
 }
 .justify-end {
   justify-content: flex-end;
@@ -1330,10 +1318,6 @@ video {
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
-.py-5 {
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
-}
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
@@ -1410,12 +1394,6 @@ video {
 .text-\[11px\] {
   font-size: 11px;
 }
-.text-\[38px\] {
-  font-size: 38px;
-}
-.text-\[42px\] {
-  font-size: 42px;
-}
 .text-base {
   font-size: 1rem;
   line-height: 1.5rem;
@@ -1457,9 +1435,6 @@ video {
 .capitalize {
   text-transform: capitalize;
 }
-.leading-none {
-  line-height: 1;
-}
 .leading-tight {
   line-height: 1.25;
 }
@@ -1468,9 +1443,6 @@ video {
 }
 .tracking-\[0\.2em\] {
   letter-spacing: 0.2em;
-}
-.tracking-tight {
-  letter-spacing: -0.025em;
 }
 .tracking-wide {
   letter-spacing: 0.025em;
@@ -1628,11 +1600,6 @@ video {
 .opacity-75 {
   opacity: 0.75;
 }
-.shadow-\[0_10px_24px_rgba\(5\2c 150\2c 105\2c 0\.35\)\] {
-  --tw-shadow: 0 10px 24px rgba(5,150,105,0.35);
-  --tw-shadow-colored: 0 10px 24px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
 .shadow-\[0_14px_28px_rgba\(16\2c 24\2c 40\2c 0\.12\)\] {
   --tw-shadow: 0 14px 28px rgba(16,24,40,0.12);
   --tw-shadow-colored: 0 14px 28px var(--tw-shadow-color);
@@ -1666,11 +1633,6 @@ video {
 .shadow-lg {
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-.shadow-md {
-  --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 .shadow-sm {
@@ -1726,6 +1688,44 @@ video {
 }
 .ease-in-out {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pageTitle {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+}
+.pageSubtitle {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity, 1));
+}
+.valuePrimary {
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+}
+.valueSecondary {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+}
+.badgeText {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+}
+.tabLabel {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+}
+.chipLabel {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 700;
 }
 
 :root {
@@ -1864,6 +1864,11 @@ body {
 .hover\:bg-slate-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:text-emerald-700:hover {
+  --tw-text-opacity: 1;
+  color: rgb(4 120 87 / var(--tw-text-opacity, 1));
 }
 
 .hover\:text-primary-700:hover {
