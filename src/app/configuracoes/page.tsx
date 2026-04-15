@@ -42,7 +42,7 @@ export default function ConfiguracoesPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <main className="min-h-screen bg-[#E8EEEC] px-4 pb-8 pt-7">
+      <main className="min-h-screen bg-[#E8EEEC] px-4 pb-8 pt-6 sm:px-5 sm:pt-7">
         <div className="mx-auto w-full max-w-md">
           <header className="mb-5 flex items-center gap-3">
             <button

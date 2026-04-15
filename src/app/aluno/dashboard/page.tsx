@@ -54,8 +54,8 @@ export default function AlunoDashboardPage() {
       <AlunoLayout>
         <div className="space-y-5">
           <header>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ola, {usuario?.nome?.split(' ')[0]}</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Acompanhe pagamentos, pendencias e comprovantes.</p>
+            <h1 className="pageTitle text-gray-900 dark:text-white">Ola, {usuario?.nome?.split(' ')[0]}</h1>
+            <p className="pageSubtitle text-gray-600 dark:text-gray-400">Acompanhe pagamentos, pendencias e comprovantes.</p>
           </header>
 
           {stats?.mensalidadeAtual && stats.mensalidadeAtual.status !== 'pago' ? (
@@ -65,7 +65,7 @@ export default function AlunoDashboardPage() {
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Mensalidade atual</h2>
                   <Badge status={stats.mensalidadeAtual.status} size="sm" />
                 </div>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatarValor(stats.mensalidadeAtual.valor)}</p>
+                <p className="valuePrimary text-gray-900 dark:text-white">{formatarValor(stats.mensalidadeAtual.valor)}</p>
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                   <Calendar className="h-4 w-4" />
                   <span>Vencimento: {formatarData(stats.mensalidadeAtual.dataVencimento)}</span>

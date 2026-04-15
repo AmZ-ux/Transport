@@ -72,7 +72,7 @@ export default function AlunosPage() {
   return (
     <ProtectedRoute tipoRequerido="admin">
       <main className="min-h-screen bg-[#E8EEEC] pb-24">
-        <div className="mx-auto w-full max-w-md px-4 pb-4 pt-7">
+        <div className="mx-auto w-full max-w-md px-4 pb-4 pt-6 sm:px-5 sm:pt-7">
           <header className="mb-4 flex items-start justify-between">
             <div>
               <h1 className="pageTitle text-gray-900">Passageiros</h1>
@@ -96,7 +96,7 @@ export default function AlunosPage() {
             />
           </div>
 
-          <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+          <div className="no-scrollbar mb-2 flex gap-2 overflow-x-auto pb-1">
             {instituicoes.map((inst) => {
               const active = inst === instFiltro;
               const count = inst === 'Todas' ? alunosComStatus.length : alunosComStatus.filter((a) => a.faculdade.toUpperCase() === inst).length;
@@ -115,7 +115,7 @@ export default function AlunosPage() {
             })}
           </div>
 
-          <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+          <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto pb-1">
             {STATUS_CHIPS.map((chip) => {
               const active = chip.value === statusFiltro;
               const count = !chip.value ? alunosComStatus.length : countByStatus[chip.value];
@@ -147,13 +147,13 @@ export default function AlunosPage() {
                     <AdminAvatar name={aluno.nome} />
 
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xl font-extrabold text-gray-900">{aluno.nome}</p>
+                      <p className="truncate text-[clamp(1.25rem,4.8vw,1.7rem)] font-extrabold text-gray-900">{aluno.nome}</p>
                       <p className="text-sm font-medium text-gray-500">{formatarTelefone(aluno.telefone)}</p>
                       <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">• {aluno.faculdade.toUpperCase()}</p>
                       <p className="valueSecondary text-emerald-700">{formatarValor(aluno.valorMensalidade)}/mes</p>
                     </div>
 
-                    <div className="self-start pt-1">
+                    <div className="shrink-0 self-start pt-1">
                       <AdminStatusPill status={aluno.status} compact />
                     </div>
                   </div>

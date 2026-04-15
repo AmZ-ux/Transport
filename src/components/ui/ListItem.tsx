@@ -47,7 +47,7 @@ export function ListItem({
         {(value || actions) && (
           <div className="flex flex-col items-start gap-2 sm:items-end">
             {value && <div className="text-lg font-bold text-gray-900 dark:text-white">{value}</div>}
-            {actions && <div className="flex items-center gap-2">{actions}</div>}
+            {actions && <div className="flex flex-wrap items-center gap-2 sm:justify-end">{actions}</div>}
           </div>
         )}
       </div>

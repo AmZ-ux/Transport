@@ -21,11 +21,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/page.js"
     ],
-    "/configuracoes/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/configuracoes/page.js"
-    ],
     "/alunos/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",

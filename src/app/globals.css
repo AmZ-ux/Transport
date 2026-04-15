@@ -20,6 +20,7 @@ body {
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
+  overflow-x: hidden;
 }
 
 * {
@@ -61,35 +62,45 @@ body {
 
 @layer utilities {
   .pageTitle {
-    @apply text-4xl font-black tracking-tight;
+    font-size: clamp(2rem, 6vw, 2.5rem);
+    line-height: 1.05;
+    @apply font-black tracking-tight;
   }
 
   .pageSubtitle {
-    @apply text-sm font-semibold text-gray-500;
+    font-size: clamp(0.78rem, 2.4vw, 0.92rem);
+    @apply font-semibold text-gray-500;
   }
 
   .cardTitle {
-    @apply text-lg font-extrabold;
+    font-size: clamp(1.15rem, 3.8vw, 1.45rem);
+    line-height: 1.15;
+    @apply font-extrabold;
   }
 
   .valuePrimary {
-    @apply text-[38px] font-black leading-none;
+    font-size: clamp(2rem, 8vw, 2.6rem);
+    @apply font-black leading-none;
   }
 
   .valueSecondary {
-    @apply text-sm font-semibold;
+    font-size: clamp(0.82rem, 2.6vw, 0.95rem);
+    @apply font-semibold;
   }
 
   .badgeText {
-    @apply text-xs font-semibold;
+    font-size: clamp(0.68rem, 2.1vw, 0.78rem);
+    @apply font-semibold;
   }
 
   .tabLabel {
-    @apply text-xs font-semibold;
+    font-size: clamp(0.68rem, 2.1vw, 0.78rem);
+    @apply font-semibold;
   }
 
   .chipLabel {
-    @apply text-xs font-bold;
+    font-size: clamp(0.7rem, 2.2vw, 0.8rem);
+    @apply font-bold;
   }
 
   .no-scrollbar {
@@ -99,6 +110,11 @@ body {
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 

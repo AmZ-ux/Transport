@@ -58,7 +58,7 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute tipoRequerido="admin">
       <main className="min-h-screen bg-[#E8EEEC] pb-24">
-        <section className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-b from-emerald-700 to-emerald-600 px-4 pb-10 pt-7">
+        <section className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-b from-emerald-700 to-emerald-600 px-4 pb-10 pt-6 sm:px-5 sm:pt-7">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-6 flex items-center justify-between">
               <h1 className="pageTitle text-white">Painel Admin</h1>
@@ -72,14 +72,14 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <article className="rounded-[24px] bg-white p-5 shadow-[0_14px_28px_rgba(16,24,40,0.12)]">
-              <div className="mb-4 flex items-start justify-between gap-4">
-                <div>
+            <article className="rounded-[24px] bg-white p-4 shadow-[0_14px_28px_rgba(16,24,40,0.12)] sm:p-5">
+              <div className="mb-4 flex flex-col items-start gap-4 min-[360px]:flex-row min-[360px]:justify-between">
+                <div className="min-w-0">
                   <p className="text-xs font-bold tracking-[0.22em] text-gray-500">{nomeMes}</p>
                   <p className="valuePrimary mt-1 text-gray-950">{formatarValor(stats.totalRecebido)}</p>
                   <p className="valueSecondary mt-2">de {formatarValor(stats.totalReceberMes)} esperado</p>
                 </div>
-                <div className="text-center">
+                <div className="self-end text-center min-[360px]:self-auto">
                   <ProgressCircle value={pagos} total={total} />
                   <p className="mt-1 text-sm font-bold text-gray-700">Pagos</p>
                 </div>
@@ -102,7 +102,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <div className="mx-auto mt-4 w-full max-w-md space-y-5 px-4">
+        <div className="mx-auto mt-4 w-full max-w-md space-y-4 px-4 sm:space-y-5 sm:px-5">
           <section>
             <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-gray-500">Acoes do administrador</h2>
             <div className="space-y-3">

@@ -50,7 +50,7 @@ export default function NovoAlunoPage() {
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <main className="min-h-screen bg-[#EEF2F1] px-4 pb-8 pt-6">
+      <main className="min-h-screen bg-[#E8EEEC] px-4 pb-8 pt-6 sm:px-5">
         <div className="mx-auto w-full max-w-2xl space-y-4">
           <button
             onClick={() => router.push('/alunos')}

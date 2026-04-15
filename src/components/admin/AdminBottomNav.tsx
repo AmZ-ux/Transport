@@ -19,7 +19,7 @@ export function AdminBottomNav() {
   };
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 px-3 pb-safe pt-2 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white/95 px-2 pb-safe pt-2 backdrop-blur md:hidden">
       <ul className="grid grid-cols-3 gap-1">
         {items.map((item) => {
           const active = isActive(item.href);
@@ -29,7 +29,7 @@ export function AdminBottomNav() {
             <li key={item.key}>
               <Link
                 href={item.href}
-                className={`flex flex-col items-center justify-center rounded-xl py-2 text-xs font-semibold transition duration-200 ${
+                className={`touch-target flex flex-col items-center justify-center rounded-xl px-1 py-2 transition duration-200 ${
                   active ? 'bg-emerald-50 text-emerald-700 shadow-sm' : 'text-gray-400'
                 }`}
               >

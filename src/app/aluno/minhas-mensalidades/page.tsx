@@ -88,9 +88,9 @@ export default function MinhasMensalidadesPage() {
           <header>
             <div className="flex items-center gap-2">
               <Receipt className="h-6 w-6 text-primary-600" />
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Minhas mensalidades</h1>
+              <h1 className="pageTitle text-gray-900 dark:text-white">Minhas mensalidades</h1>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Acompanhe historico e status de pagamento.</p>
+            <p className="pageSubtitle text-gray-600 dark:text-gray-400">Acompanhe historico e status de pagamento.</p>
           </header>
 
           {totalPendente > 0 && (
@@ -107,7 +107,7 @@ export default function MinhasMensalidadesPage() {
             </Card>
           )}
 
-          <div className="flex flex-wrap gap-2">
+          <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
             {STATUS_OPTIONS.map((opt) => {
               const ativo = (!filtroStatus && opt.value === '') || filtroStatus === opt.value;
               const qtd = opt.value ? mensalidades.filter((item) => item.status === opt.value).length : mensalidades.length;
@@ -116,7 +116,7 @@ export default function MinhasMensalidadesPage() {
                 <button
                   key={opt.value}
                   onClick={() => setFiltroStatus(opt.value)}
-                  className={`min-h-[40px] rounded-full px-3 text-sm font-semibold transition ${
+                  className={`chipLabel min-h-[40px] whitespace-nowrap rounded-full px-3 transition ${
                     ativo
                       ? 'bg-primary-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300'

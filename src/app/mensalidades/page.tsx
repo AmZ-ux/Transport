@@ -89,7 +89,7 @@ export default function MensalidadesPage() {
   return (
     <ProtectedRoute tipoRequerido="admin">
       <main className="min-h-screen bg-[#E8EEEC] pb-24">
-        <div className="mx-auto w-full max-w-md px-4 pb-4 pt-7">
+        <div className="mx-auto w-full max-w-md px-4 pb-4 pt-6 sm:px-5 sm:pt-7">
           <header className="mb-4 flex items-start justify-between gap-3">
             <div>
               <h1 className="pageTitle text-gray-900">Pagamentos</h1>
@@ -105,7 +105,7 @@ export default function MensalidadesPage() {
             </button>
           </header>
 
-          <div className="no-scrollbar mb-4 grid auto-cols-[74px] grid-flow-col gap-2 overflow-x-auto pb-1 pr-1">
+          <div className="no-scrollbar mb-4 grid auto-cols-[clamp(4.2rem,20vw,4.8rem)] grid-flow-col gap-2 overflow-x-auto pb-1 pr-1">
             {meses.map((item) => {
               const active = item.mes === selecionado.mes && item.ano === selecionado.ano;
 
@@ -113,7 +113,7 @@ export default function MensalidadesPage() {
                 <button
                   key={`${item.mes}-${item.ano}`}
                   onClick={() => setSelecionado({ mes: item.mes, ano: item.ano })}
-                  className={`h-[58px] rounded-3xl px-2 text-center transition ${
+                  className={`h-[clamp(3.25rem,11vw,3.65rem)] rounded-3xl px-2 text-center transition ${
                     active
                       ? 'bg-emerald-600 text-white shadow-[0_8px_16px_rgba(5,150,105,0.28)]'
                       : 'bg-white text-gray-600 shadow-sm'
@@ -139,7 +139,7 @@ export default function MensalidadesPage() {
               </div>
               <div className="text-right">
                 <p className="text-xs font-semibold text-gray-500">Pagos</p>
-                <p className="text-4xl font-black text-emerald-700">
+                <p className="text-[clamp(2rem,8vw,2.4rem)] font-black text-emerald-700">
                   {resumo.pagos}
                   <span className="text-xl text-gray-400">/{resumo.total}</span>
                 </p>
@@ -162,7 +162,7 @@ export default function MensalidadesPage() {
                     <AdminAvatar name={item.aluno?.nome || 'Aluno'} />
 
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-2xl font-extrabold text-gray-900">{item.aluno?.nome || 'Aluno'}</p>
+                      <p className="truncate text-[clamp(1.5rem,5.5vw,2rem)] font-extrabold text-gray-900">{item.aluno?.nome || 'Aluno'}</p>
                       <p className="text-sm font-semibold text-gray-500">
                         {formatarValor(item.valor)} <span className="mx-2 text-gray-300">•</span> Dia {new Date(item.dataVencimento).getDate()}
                       </p>
@@ -173,7 +173,7 @@ export default function MensalidadesPage() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2">
                       <AdminStatusPill status={item.status} compact />
                       {item.status !== 'pago' && (
                         <button
