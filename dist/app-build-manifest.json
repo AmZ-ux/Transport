@@ -21,15 +21,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/page.js"
     ],
-    "/mensalidades/page": [
+    "/configuracoes/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/mensalidades/page.js"
+      "static/chunks/app/configuracoes/page.js"
     ],
     "/alunos/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/alunos/page.js"
+    ],
+    "/mensalidades/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/mensalidades/page.js"
     ],
     "/alunos/novo/page": [
       "static/chunks/webpack.js",

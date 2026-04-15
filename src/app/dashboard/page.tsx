@@ -2,18 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Bus, BarChart3, Clock3, Settings } from 'lucide-react';
+import { Bell, BarChart3, Clock3, Settings } from 'lucide-react';
 import { ProtectedRoute } from '@/components';
 import { AdminBottomNav } from '@/components/admin';
 import { getDashboardStats } from '@/services/storage';
 import { formatarValor } from '@/lib/utils';
-
-function saudacaoPorHora() {
-  const hora = new Date().getHours();
-  if (hora < 12) return 'Bom dia';
-  if (hora < 18) return 'Boa tarde';
-  return 'Boa noite';
-}
 
 function ProgressCircle({ value, total }: { value: number; total: number }) {
   const percent = total > 0 ? Math.round((value / total) * 100) : 0;
@@ -68,16 +61,13 @@ export default function DashboardPage() {
         <section className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-b from-emerald-700 to-emerald-600 px-4 pb-14 pt-7">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/70 text-white">
-                  <Bus className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="pageSubtitle text-emerald-100">{saudacaoPorHora()} 👋</p>
-                  <h1 className="pageTitle text-white">Painel Admin</h1>
-                </div>
-              </div>
-              <button className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/70 text-white transition duration-200 hover:scale-105">
+              <h1 className="pageTitle text-white">Painel Admin</h1>
+              <button
+                onClick={() => router.push('/configuracoes')}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/80 text-white shadow-sm transition duration-200 hover:scale-105"
+                aria-label="Abrir configuracoes"
+                title="Configuracoes"
+              >
                 <Settings className="h-4 w-4" />
               </button>
             </div>
@@ -118,45 +108,45 @@ export default function DashboardPage() {
             <div className="space-y-3">
               <button
                 onClick={() => router.push('/mensalidades')}
-                className="w-full rounded-3xl bg-rose-50 px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5"
+                className="w-full rounded-3xl border border-rose-200 bg-rose-100 px-4 py-4 text-left shadow-[0_6px_14px_rgba(225,29,72,0.10)] transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-4">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-200 text-rose-700">
                     <Bell className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-lg font-bold text-rose-700">Notificar atrasados</p>
-                    <p className="text-sm font-medium text-rose-500">Enviar cobranca para {atrasados} passageiro(s)</p>
+                    <p className="cardTitle text-rose-800">Notificar atrasados</p>
+                    <p className="valueSecondary text-rose-700">Enviar cobranca para {atrasados} passageiro(s)</p>
                   </div>
                 </div>
               </button>
 
               <button
                 onClick={() => router.push('/mensalidades')}
-                className="w-full rounded-3xl bg-amber-50 px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5"
+                className="w-full rounded-3xl border border-amber-200 bg-amber-100 px-4 py-4 text-left shadow-[0_6px_14px_rgba(217,119,6,0.10)] transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-4">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-200 text-amber-800">
                     <Clock3 className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-lg font-bold text-amber-700">Lembrar pendentes</p>
-                    <p className="text-sm font-medium text-amber-500">Enviar lembrete para {pendentes} passageiro(s)</p>
+                    <p className="cardTitle text-amber-800">Lembrar pendentes</p>
+                    <p className="valueSecondary text-amber-700">Enviar lembrete para {pendentes} passageiro(s)</p>
                   </div>
                 </div>
               </button>
 
               <button
                 onClick={() => router.push('/mensalidades')}
-                className="w-full rounded-3xl bg-emerald-50 px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5"
+                className="w-full rounded-3xl border border-emerald-200 bg-emerald-100 px-4 py-4 text-left shadow-[0_6px_14px_rgba(5,150,105,0.12)] transition duration-200 hover:-translate-y-0.5"
               >
                 <div className="flex items-center gap-4">
-                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-200 text-emerald-800">
                     <BarChart3 className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-lg font-bold text-emerald-700">Gerar relatorio mensal</p>
-                    <p className="text-sm font-medium text-emerald-500">Resumo de {nomeMes.split(' ')[0]} com todas as rotas</p>
+                    <p className="cardTitle text-emerald-800">Gerar relatorio mensal</p>
+                    <p className="valueSecondary text-emerald-700">Resumo de {nomeMes.split(' ')[0]} com todas as rotas</p>
                   </div>
                 </div>
               </button>
