@@ -1,0 +1,15 @@
+{
+  "/_not-found": "app/_not-found.js",
+  "/aluno/dashboard/page": "app/aluno/dashboard/page.js",
+  "/aluno/comprovante/[id]/page": "app/aluno/comprovante/[id]/page.js",
+  "/alunos/novo/page": "app/alunos/novo/page.js",
+  "/alunos/editar/[id]/page": "app/alunos/editar/[id]/page.js",
+  "/cadastro/page": "app/cadastro/page.js",
+  "/aluno/minhas-mensalidades/page": "app/aluno/minhas-mensalidades/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/alunos/page": "app/alunos/page.js",
+  "/login/page": "app/login/page.js",
+  "/mensalidades/page": "app/mensalidades/page.js",
+  "/pagamento/[id]/page": "app/pagamento/[id]/page.js",
+  "/page": "app/page.js"
+}

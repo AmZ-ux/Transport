@@ -1,8 +1,4 @@
 {
-  "/not-found": "app/not-found.js",
-  "/cadastro/page": "app/cadastro/page.js",
   "/login/page": "app/login/page.js",
-  "/aluno/dashboard/page": "app/aluno/dashboard/page.js",
-  "/aluno/minhas-mensalidades/page": "app/aluno/minhas-mensalidades/page.js",
   "/page": "app/page.js"
 }

@@ -1,192 +1,180 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Users,
-  Plus,
-  Search,
-  Phone,
-  MapPin,
-  GraduationCap,
-  Edit,
-  Trash2,
-  ArrowRight,
-} from 'lucide-react';
-import {
-  Layout,
-  ProtectedRoute,
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  SearchInput,
-  EmptyState,
-  ConfirmDialog,
-} from '@/components';
+import { Search, Plus } from 'lucide-react';
+import { ProtectedRoute } from '@/components';
+import { AdminAvatar, AdminBottomNav, AdminStatusPill } from '@/components/admin';
 import { useAlunos } from '@/hooks/useAlunos';
-import { Aluno } from '@/types';
-import { formatarValor, formatarTelefone } from '@/lib/utils';
+import { getMensalidades } from '@/services/storage';
+import { StatusMensalidade } from '@/types';
+import { formatarTelefone, formatarValor } from '@/lib/utils';
+
+const STATUS_CHIPS: Array<{ value: '' | StatusMensalidade; label: string }> = [
+  { value: '', label: 'Todos' },
+  { value: 'pago', label: 'Pagos' },
+  { value: 'pendente', label: 'Pendentes' },
+  { value: 'atrasado', label: 'Atrasados' },
+];
 
 export default function AlunosPage() {
   const router = useRouter();
-  const { alunos, carregando, buscar, excluir } = useAlunos();
+  const { alunos, carregando } = useAlunos();
   const [busca, setBusca] = useState('');
-  const [alunoExcluir, setAlunoExcluir] = useState<Aluno | null>(null);
+  const [instFiltro, setInstFiltro] = useState('Todas');
+  const [statusFiltro, setStatusFiltro] = useState<'' | StatusMensalidade>('');
 
-  const handleBusca = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = e.target.value;
-    setBusca(valor);
-    buscar(valor);
-  };
+  const mensalidadesMes = useMemo(() => {
+    const hoje = new Date();
+    const mes = hoje.getMonth() + 1;
+    const ano = hoje.getFullYear();
+    return getMensalidades().filter((m) => m.mesReferencia === mes && m.anoReferencia === ano);
+  }, [alunos.length]);
 
-  const confirmarExclusao = async () => {
-    if (alunoExcluir) {
-      excluir(alunoExcluir.id);
-      setAlunoExcluir(null);
-    }
-  };
+  const alunosComStatus = useMemo(() => {
+    return alunos.map((aluno) => {
+      const mensalidade = mensalidadesMes.find((m) => m.alunoId === aluno.id);
+      return {
+        ...aluno,
+        status: mensalidade?.status ?? 'pendente',
+      };
+    });
+  }, [alunos, mensalidadesMes]);
+
+  const instituicoes = useMemo(() => {
+    const set = new Set(alunosComStatus.map((a) => a.faculdade.toUpperCase()));
+    return ['Todas', ...Array.from(set)];
+  }, [alunosComStatus]);
+
+  const lista = useMemo(() => {
+    return alunosComStatus.filter((aluno) => {
+      const matchBusca =
+        !busca ||
+        aluno.nome.toLowerCase().includes(busca.toLowerCase()) ||
+        aluno.telefone.includes(busca.replace(/\D/g, ''));
+
+      const matchInst = instFiltro === 'Todas' || aluno.faculdade.toUpperCase() === instFiltro;
+      const matchStatus = !statusFiltro || aluno.status === statusFiltro;
+
+      return matchBusca && matchInst && matchStatus;
+    });
+  }, [alunosComStatus, busca, instFiltro, statusFiltro]);
+
+  const countByStatus = useMemo(
+    () => ({
+      pago: alunosComStatus.filter((a) => a.status === 'pago').length,
+      pendente: alunosComStatus.filter((a) => a.status === 'pendente').length,
+      atrasado: alunosComStatus.filter((a) => a.status === 'atrasado').length,
+    }),
+    [alunosComStatus]
+  );
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <Layout>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <main className="min-h-screen bg-[#EEF2F1] pb-24">
+        <div className="mx-auto w-full max-w-md px-4 pb-4 pt-7">
+          <header className="mb-4 flex items-start justify-between">
             <div>
-              <div className="flex items-center gap-2">
-                <Users className="h-6 w-6 text-primary-600" />
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Alunos</h1>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400">
-                {alunos.length} aluno{alunos.length > 1 ? 's' : ''} cadastrado{alunos.length > 1 ? 's' : ''}
-              </p>
+              <h1 className="text-4xl font-black tracking-tight text-gray-900">Passageiros</h1>
+              <p className="mt-1 text-sm font-semibold text-gray-500">{alunosComStatus.length} cadastrados</p>
             </div>
-            <Button
-              variant="primary"
+            <button
               onClick={() => router.push('/alunos/novo')}
+              className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_8px_20px_rgba(5,150,105,0.35)] transition duration-200 hover:scale-105"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Aluno
-            </Button>
-          </div>
+              <Plus className="h-6 w-6" />
+            </button>
+          </header>
 
-          {/* Search */}
-          <div className="max-w-md">
-            <SearchInput
-              placeholder="Buscar por nome, telefone, curso..."
+          <div className="relative mb-3">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <input
               value={busca}
-              onChange={handleBusca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar passageiro..."
+              className="h-12 w-full rounded-2xl border border-transparent bg-[#F4F6F5] pl-12 pr-4 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:border-emerald-300 focus:outline-none"
             />
           </div>
 
-          {/* Grid de Alunos */}
-          {alunos.length === 0 ? (
-            <EmptyState
-              title="Nenhum aluno encontrado"
-              description="Comece cadastrando seu primeiro aluno para gerenciar as mensalidades."
-              icon={<Users className="h-12 w-12 text-gray-400" />}
-              action={{
-                label: 'Cadastrar Aluno',
-                onClick: () => router.push('/alunos/novo'),
-              }}
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {alunos.map((aluno) => (
-                <Card key={aluno.id} hover className="group">
-                  <CardBody className="p-5">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">
-                          {aluno.nome}
-                        </h3>
-                        <div className="flex items-center gap-1 text-sm text-gray-500">
-                          <GraduationCap className="h-4 w-4" />
-                          {aluno.curso} - {aluno.faculdade}
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => router.push(`/alunos/editar/${aluno.id}`)}
-                          className="p-2"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setAlunoExcluir(aluno)}
-                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+          <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+            {instituicoes.map((inst) => {
+              const active = inst === instFiltro;
+              const count = inst === 'Todas' ? alunosComStatus.length : alunosComStatus.filter((a) => a.faculdade.toUpperCase() === inst).length;
+
+              return (
+                <button
+                  key={inst}
+                  onClick={() => setInstFiltro(inst)}
+                  className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-bold transition ${
+                    active ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-gray-600'
+                  }`}
+                >
+                  {inst} <span className={`${active ? 'text-emerald-100' : 'text-gray-400'}`}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+            {STATUS_CHIPS.map((chip) => {
+              const active = chip.value === statusFiltro;
+              const count = !chip.value ? alunosComStatus.length : countByStatus[chip.value];
+
+              return (
+                <button
+                  key={chip.label}
+                  onClick={() => setStatusFiltro(chip.value)}
+                  className={`whitespace-nowrap rounded-full px-3 py-2 text-xs font-bold transition ${
+                    active ? 'bg-gray-900 text-white' : 'bg-white text-gray-600'
+                  }`}
+                >
+                  {chip.label} <span className={`${active ? 'text-gray-200' : 'text-gray-400'}`}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <section className="space-y-3">
+            {carregando && <p className="py-6 text-center text-sm font-semibold text-gray-500">Carregando passageiros...</p>}
+
+            {!carregando &&
+              lista.map((aluno) => (
+                <article
+                  key={aluno.id}
+                  className="rounded-[22px] bg-white px-4 py-3 shadow-[0_6px_18px_rgba(15,23,42,0.08)] transition duration-200 hover:-translate-y-0.5"
+                >
+                  <div className="flex items-center gap-3">
+                    <AdminAvatar name={aluno.nome} />
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xl font-extrabold text-gray-900">{aluno.nome}</p>
+                      <p className="text-sm font-medium text-gray-500">{formatarTelefone(aluno.telefone)}</p>
+                      <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">• {aluno.faculdade.toUpperCase()}</p>
+                      <p className="text-sm font-extrabold text-emerald-700">{formatarValor(aluno.valorMensalidade)}/mes</p>
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <a
-                          href={`https://wa.me/55${aluno.telefone.replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary-600 hover:underline"
-                        >
-                          {formatarTelefone(aluno.telefone)}
-                        </a>
-                      </div>
-
-                      {aluno.endereco && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          <span className="truncate">{aluno.endereco}</span>
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <span>Ponto: {aluno.pontoEmbarque}</span>
-                      </div>
+                    <div className="self-start pt-1">
+                      <AdminStatusPill status={aluno.status} compact />
                     </div>
-
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-gray-500">Mensalidade</p>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            {formatarValor(aluno.valorMensalidade)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">Vencimento</p>
-                          <p className="font-semibold text-gray-900 dark:text-white">
-                            Dia {aluno.diaVencimento}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
+                  </div>
+                </article>
               ))}
-            </div>
-          )}
+
+            {!carregando && !lista.length && (
+              <div className="rounded-2xl bg-white p-8 text-center text-sm font-semibold text-gray-500">Nenhum passageiro encontrado.</div>
+            )}
+          </section>
         </div>
 
-        {/* Dialog de confirmacao */}
-        <ConfirmDialog
-          isOpen={!!alunoExcluir}
-          onClose={() => setAlunoExcluir(null)}
-          onConfirm={confirmarExclusao}
-          title="Confirmar exclusao"
-          message={`Deseja realmente excluir o aluno "${alunoExcluir?.nome}"? O aluno sera marcado como inativo.`}
-          confirmText="Excluir"
-          cancelText="Cancelar"
-          variant="danger"
-        />
-      </Layout>
+        <button
+          onClick={() => router.push('/alunos/novo')}
+          className="fixed bottom-24 right-5 inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_10px_24px_rgba(5,150,105,0.35)] transition duration-200 hover:scale-105 md:hidden"
+        >
+          <Plus className="h-7 w-7" />
+        </button>
+
+        <AdminBottomNav />
+      </main>
     </ProtectedRoute>
   );
 }

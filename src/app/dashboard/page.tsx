@@ -1,303 +1,201 @@
-'use client';
+﻿'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  DollarSign,
-  Users,
-  TrendingUp,
-  AlertTriangle,
-  ArrowRight,
-  Receipt,
-  CheckCircle,
-} from 'lucide-react';
-import {
-  Layout,
-  ProtectedRoute,
-  StatCard,
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  Badge,
-  Loading,
-} from '@/components';
-import { getDashboardStats, DashboardStats } from '@/services/storage';
-import { formatarValor, formatarData } from '@/lib/utils';
+import { Bell, Bus, BarChart3, Clock3, Settings } from 'lucide-react';
+import { ProtectedRoute, Button } from '@/components';
+import { AdminBottomNav } from '@/components/admin';
+import { getDashboardStats } from '@/services/storage';
+import { formatarValor } from '@/lib/utils';
+
+function saudacaoPorHora() {
+  const hora = new Date().getHours();
+  if (hora < 12) return 'Bom dia';
+  if (hora < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+function ProgressCircle({ value, total }: { value: number; total: number }) {
+  const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+  const radius = 34;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
+
+  return (
+    <div className="relative h-20 w-20">
+      <svg viewBox="0 0 84 84" className="h-20 w-20 -rotate-90">
+        <circle cx="42" cy="42" r={radius} className="fill-none stroke-emerald-100" strokeWidth="8" />
+        <circle
+          cx="42"
+          cy="42"
+          r={radius}
+          className="fill-none stroke-emerald-500 transition-all duration-300"
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
+        <span className="text-2xl font-extrabold text-gray-900">{value}</span>
+        <span className="text-[11px] font-semibold text-gray-500">de {total}</span>
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [carregando, setCarregando] = useState(true);
   const router = useRouter();
+  const [stats] = useState(() => getDashboardStats());
 
-  useEffect(() => {
-    const dados = getDashboardStats();
-    setStats(dados);
-    setCarregando(false);
-  }, []);
+  const nomeMes = useMemo(
+    () => new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase(),
+    []
+  );
 
-  const hoje = new Date();
-  const nomeMesAtual = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const pagos = stats.totalPagos;
+  const pendentes = stats.totalPendentes;
+  const atrasados = stats.totalAtrasados;
+  const total = pagos + pendentes + atrasados;
 
-  if (carregando) {
-    return (
-      <ProtectedRoute>
-        <Layout>
-          <Loading />
-        </Layout>
-      </ProtectedRoute>
-    );
-  }
-
-  const atrasados = stats?.mensalidadesMes.filter(m => m.status === 'atrasado') || [];
-  const pendentes = stats?.mensalidadesMes.filter(m => m.status === 'pendente') || [];
-  const pagos = stats?.mensalidadesMes.filter(m => m.status === 'pago') || [];
+  const pagPercent = total ? (pagos / total) * 100 : 0;
+  const penPercent = total ? (pendentes / total) * 100 : 0;
+  const atrPercent = total ? (atrasados / total) * 100 : 0;
 
   return (
     <ProtectedRoute tipoRequerido="admin">
-      <Layout>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Administrativo</h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Visão geral de {nomeMesAtual}
-              </p>
+      <main className="min-h-screen bg-[#EEF2F1] pb-24">
+        <section className="relative overflow-hidden rounded-b-[28px] bg-gradient-to-b from-emerald-700 to-emerald-600 px-4 pb-14 pt-7">
+          <div className="mx-auto w-full max-w-md">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500/70 text-white">
+                  <Bus className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-emerald-100">{saudacaoPorHora()} 👋</p>
+                  <h1 className="text-3xl font-extrabold text-white">Painel Admin</h1>
+                </div>
+              </div>
+              <button className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/70 text-white transition duration-200 hover:scale-105">
+                <Settings className="h-4 w-4" />
+              </button>
             </div>
-            <Button
-              variant="primary"
-              onClick={() => router.push('/alunos/novo')}
-            >
-              + Novo Aluno
-            </Button>
-          </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="Total a Receber"
-              value={formatarValor(stats?.totalReceberMes || 0)}
-              icon={<Receipt className="h-6 w-6" />}
-              color="blue"
-            />
-            <StatCard
-              title="Total Recebido"
-              value={formatarValor(stats?.totalRecebido || 0)}
-              icon={<CheckCircle className="h-6 w-6" />}
-              color="green"
-              trend={{
-                value: stats?.totalReceberMes
-                  ? Math.round((stats.totalRecebido / stats.totalReceberMes) * 100)
-                  : 0,
-                label: 'do total',
-              }}
-            />
-            <StatCard
-              title="Em Atraso"
-              value={formatarValor(stats?.totalAtraso || 0)}
-              icon={<AlertTriangle className="h-6 w-6" />}
-              color="red"
-            />
-            <StatCard
-              title="Alunos Ativos"
-              value={stats?.quantidadeAlunosAtivos || 0}
-              icon={<Users className="h-6 w-6" />}
-              color="purple"
-            />
-          </div>
+            <article className="rounded-[24px] bg-white p-5 shadow-[0_14px_28px_rgba(16,24,40,0.12)]">
+              <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold tracking-[0.22em] text-gray-500">{nomeMes}</p>
+                  <p className="mt-1 text-[42px] font-black leading-none text-gray-950">{formatarValor(stats.totalRecebido)}</p>
+                  <p className="mt-2 text-sm font-medium text-gray-500">de {formatarValor(stats.totalReceberMes)} esperado</p>
+                </div>
+                <div className="text-center">
+                  <ProgressCircle value={pagos} total={total} />
+                  <p className="mt-1 text-sm font-bold text-gray-700">Pagos</p>
+                </div>
+              </div>
 
-          {/* Taxa de Inadimplência */}
-          <Card className="bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
-            <CardBody className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="h-6 w-6 text-orange-600" />
+              <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                <div className="flex h-full">
+                  <span style={{ width: `${pagPercent}%` }} className="h-full bg-emerald-500" />
+                  <span style={{ width: `${penPercent}%` }} className="h-full bg-amber-400" />
+                  <span style={{ width: `${atrPercent}%` }} className="h-full bg-rose-500" />
+                </div>
+              </div>
+
+              <div className="mt-3 grid grid-cols-3 gap-2 text-xs font-semibold">
+                <p className="text-emerald-700">● {pagos} Pagos</p>
+                <p className="text-amber-700">● {pendentes} Pendentes</p>
+                <p className="text-rose-700">● {atrasados} Atrasados</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <div className="mx-auto -mt-9 w-full max-w-md space-y-5 px-4">
+          <section>
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-gray-500">Acoes do administrador</h2>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push('/mensalidades')}
+                className="w-full rounded-3xl bg-rose-50 px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5"
+              >
+                <div className="flex items-center gap-4">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+                    <Bell className="h-5 w-5" />
+                  </span>
                   <div>
-                    <p className="text-sm text-orange-700 dark:text-orange-300">Taxa de Inadimplência</p>
-                    <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                      {stats?.taxaInadimplencia || 0}%
-                    </p>
+                    <p className="text-lg font-bold text-rose-700">Notificar atrasados</p>
+                    <p className="text-sm font-medium text-rose-500">Enviar cobranca para {atrasados} passageiro(s)</p>
                   </div>
                 </div>
-                <div className="text-right text-sm text-orange-700 dark:text-orange-300">
-                  <p>{stats?.totalAtrasados || 0} alunos em atraso</p>
-                  <p>{stats?.totalPendentes || 0} alunos pendentes</p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+              </button>
 
-          {/* Atrasados Alert */}
-          {atrasados.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-medium text-red-800 dark:text-red-300">
-                  Voce tem {atrasados.length} mensalidade{atrasados.length > 1 ? 's' : ''} em atraso
-                </h3>
-                <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-                  Total: {formatarValor(atrasados.reduce((acc, m) => acc + m.valor, 0))}
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
                 onClick={() => router.push('/mensalidades')}
-                className="text-red-600 hover:bg-red-100"
+                className="w-full rounded-3xl bg-amber-50 px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5"
               >
-                Ver tudo <ArrowRight className="h-4 w-4 ml-1" />
+                <div className="flex items-center gap-4">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                    <Clock3 className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-lg font-bold text-amber-700">Lembrar pendentes</p>
+                    <p className="text-sm font-medium text-amber-500">Enviar lembrete para {pendentes} passageiro(s)</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => router.push('/mensalidades')}
+                className="w-full rounded-3xl bg-emerald-50 px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5"
+              >
+                <div className="flex items-center gap-4">
+                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                    <BarChart3 className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-lg font-bold text-emerald-700">Gerar relatorio mensal</p>
+                    <p className="text-sm font-medium text-emerald-500">Resumo de {nomeMes.split(' ')[0]} com todas as rotas</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-gray-500">Gestao</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <Button onClick={() => router.push('/alunos')} className="justify-start rounded-3xl bg-emerald-600 px-5 py-5 text-left text-white shadow-md hover:bg-emerald-700">
+                <span>
+                  <span className="block text-xl font-bold">Passageiros</span>
+                  <span className="block text-sm text-emerald-100">{stats.quantidadeAlunosAtivos} cadastrados</span>
+                </span>
+              </Button>
+
+              <Button onClick={() => router.push('/mensalidades')} variant="ghost" className="justify-start rounded-3xl border border-gray-200 bg-white px-5 py-5 text-left shadow-sm">
+                <span>
+                  <span className="block text-xl font-bold text-gray-900">Pagamentos</span>
+                  <span className="block text-sm text-gray-500">{pagos}/{total} pagos</span>
+                </span>
+              </Button>
+
+              <Button onClick={() => router.push('/alunos/novo')} variant="ghost" className="justify-start rounded-3xl border border-gray-200 bg-white px-5 py-5 text-left shadow-sm">
+                <span className="text-lg font-bold text-gray-900">Novo passageiro</span>
+              </Button>
+
+              <Button onClick={() => router.push('/cadastro')} variant="ghost" className="justify-start rounded-3xl border border-gray-200 bg-white px-5 py-5 text-left shadow-sm">
+                <span>
+                  <span className="block text-xl font-bold text-gray-900">Portal</span>
+                  <span className="block text-sm text-gray-500">Area do passageiro</span>
+                </span>
               </Button>
             </div>
-          )}
-
-          {/* Mensalidades do Mes */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Mensalidades do Mes
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push('/mensalidades')}
-                >
-                  Ver todas <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardBody>
-              {stats?.mensalidadesMes.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <p>Nenhuma mensalidade para este mes.</p>
-                  <p className="text-sm mt-1">Cadastre alunos para gerar mensalidades automaticamente.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aluno</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vencimento</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acoes</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {stats?.mensalidadesMes.slice(0, 10).map((mensalidade) => (
-                        <tr key={mensalidade.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                          <td className="px-4 py-3">
-                            <div className="font-medium text-gray-900 dark:text-white">
-                              {mensalidade.aluno?.nome || 'Aluno'}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {mensalidade.aluno?.curso}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-gray-600 dark:text-gray-400">
-                            {formatarData(mensalidade.dataVencimento)}
-                          </td>
-                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">
-                            {formatarValor(mensalidade.valor)}
-                          </td>
-                          <td className="px-4 py-3">
-                            <Badge status={mensalidade.status} />
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            {mensalidade.status !== 'pago' && (
-                              <Button
-                                variant="success"
-                                size="sm"
-                                onClick={() => router.push(`/pagamento/${mensalidade.id}`)}
-                              >
-                                Receber
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {stats?.mensalidadesMes.length > 10 && (
-                    <div className="text-center py-3 border-t border-gray-200 dark:border-gray-700">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push('/mensalidades')}
-                      >
-                        Ver {stats.mensalidadesMes.length - 10} mensalidades a mais
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardBody>
-          </Card>
-
-          {/* Resumo por Status */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-              <CardBody className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-green-700 dark:text-green-300">Pagos</p>
-                    <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                      {pagos.length}
-                    </p>
-                    <p className="text-sm text-green-600 dark:text-green-400">
-                      {formatarValor(pagos.reduce((acc, m) => acc + m.valor, 0))}
-                    </p>
-                  </div>
-                  <div className="bg-green-200 dark:bg-green-800 p-3 rounded-lg">
-                    <CheckCircle className="h-6 w-6 text-green-700 dark:text-green-300" />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-              <CardBody className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-yellow-700 dark:text-yellow-300">Pendentes</p>
-                    <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">
-                      {pendentes.length}
-                    </p>
-                    <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                      {formatarValor(pendentes.reduce((acc, m) => acc + m.valor, 0))}
-                    </p>
-                  </div>
-                  <div className="bg-yellow-200 dark:bg-yellow-800 p-3 rounded-lg">
-                    <Receipt className="h-6 w-6 text-yellow-700 dark:text-yellow-300" />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-              <CardBody className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-red-700 dark:text-red-300">Atrasados</p>
-                    <p className="text-2xl font-bold text-red-900 dark:text-red-100">
-                      {atrasados.length}
-                    </p>
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {formatarValor(atrasados.reduce((acc, m) => acc + m.valor, 0))}
-                    </p>
-                  </div>
-                  <div className="bg-red-200 dark:bg-red-800 p-3 rounded-lg">
-                    <AlertTriangle className="h-6 w-6 text-red-700 dark:text-red-300" />
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          </div>
+          </section>
         </div>
-      </Layout>
+
+        <AdminBottomNav />
+      </main>
     </ProtectedRoute>
   );
-}
 }

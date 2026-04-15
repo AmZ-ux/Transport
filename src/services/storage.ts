@@ -1,5 +1,22 @@
-import { Aluno, Mensalidade, Usuario, StatusMensalidade, DashboardStats, DashboardAlunoStats, FiltrosMensalidade, CadastroAlunoDTO, Notificacao, ComprovantePagamento } from '@/types';
-import { gerarId, calcularStatus, gerarDataVencimento } from '@/lib/utils';
+import {
+  Aluno,
+  Mensalidade,
+  Usuario,
+  StatusMensalidade,
+  DashboardStats,
+  DashboardAlunoStats,
+  FiltrosMensalidade,
+  CadastroAlunoDTO,
+  Notificacao,
+  ComprovantePagamento,
+} from '@/types';
+import {
+  gerarId,
+  calcularStatus,
+  gerarDataVencimento,
+  formatarValor,
+  formatarData,
+} from '@/lib/utils';
 
 // Chaves do localStorage
 const KEYS = {
@@ -21,16 +38,21 @@ export function getAlunos(): Aluno[] {
   const alunos: Aluno[] = JSON.parse(data);
   // Vincular dados do usuário
   const usuarios = getUsuarios();
-  return alunos.map(a => ({
-    ...a,
-    usuario: usuarios.find(u => u.id === a.usuarioId),
-  }));
+  return alunos.map(aluno => {
+    const usuario = usuarios.find(u => u.id === aluno.usuarioId);
+    return {
+      ...aluno,
+      nome: aluno.nome || usuario?.nome || '',
+      usuario,
+    };
+  });
 }
 
 export function salvarAluno(aluno: Omit<Aluno, 'id' | 'dataCadastro'>): Aluno {
   const alunos = getAlunos();
   const novoAluno: Aluno = {
     ...aluno,
+    usuarioId: aluno.usuarioId || gerarId(),
     id: gerarId(),
     dataCadastro: new Date().toISOString(),
   };
@@ -67,6 +89,7 @@ export function cadastrarAlunoPublico(dados: CadastroAlunoDTO): { sucesso: boole
   const diaVencimentoPadrao = 10; // Dia 10 padrao
 
   salvarAluno({
+    nome: dados.nome,
     usuarioId: usuario.id,
     telefone: dados.telefone.replace(/\D/g, ''),
     endereco: dados.endereco,
@@ -165,7 +188,14 @@ export function atualizarMensalidade(mensalidade: Mensalidade): Mensalidade {
 
 export function getMensalidadePorId(id: string): Mensalidade | null {
   const mensalidades = getMensalidades();
-  return mensalidades.find(m => m.id === id) || null;
+  const mensalidade = mensalidades.find(m => m.id === id);
+  if (!mensalidade) return null;
+
+  const aluno = getAlunos().find(a => a.id === mensalidade.alunoId);
+  return {
+    ...mensalidade,
+    aluno,
+  };
 }
 
 export function filtrarMensalidades(filtros: FiltrosMensalidade): Mensalidade[] {
@@ -217,9 +247,6 @@ export function gerarMensalidadesParaAluno(aluno: Aluno): void {
 // Gerar mensalidades para todos os alunos (chamado no inicio do mes)
 export function gerarMensalidadesMes(): void {
   const alunos = getAlunosAtivos();
-  const hoje = new Date();
-  const mesAtual = hoje.getMonth() + 1;
-  const anoAtual = hoje.getFullYear();
 
   alunos.forEach(aluno => {
     gerarMensalidadesParaAluno(aluno);
@@ -239,7 +266,7 @@ export function registrarPagamento(
   const atualizada: Mensalidade = {
     ...mensalidade,
     dataPagamento,
-    formaPagamento: formaPagamento as any,
+    formaPagamento: formaPagamento as Mensalidade['formaPagamento'],
     observacoes,
     status: 'pago',
   };
@@ -601,6 +628,3 @@ export function gerarNotificacoesAutomaticas(): void {
     });
   });
 }
-
-// Importar funcoes de utils para notificacoes
-import { formatarValor, formatarData } from '@/lib/utils';

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Aluno } from '@/types';
 import {
-  getAlunos,
   getAlunosAtivos,
   salvarAluno,
   atualizarAluno,

@@ -1,35 +1,25 @@
-'use client';
+﻿'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Receipt,
-  Upload,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  Filter,
-  MessageCircle,
-  ArrowRight,
-} from 'lucide-react';
+import { MessageCircle, Receipt, Upload } from 'lucide-react';
 import {
   AlunoLayout,
-  ProtectedRoute,
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
   Badge,
+  Button,
+  Card,
+  CardBody,
+  EmptyState,
+  ListItem,
   Loading,
-  Select,
+  ProtectedRoute,
 } from '@/components';
 import { useAuth } from '@/hooks/useAuth';
-import { getMensalidades, filtrarMensalidades } from '@/services/storage';
-import { getAlunoPorUsuarioId } from '@/services/storage';
+import { filtrarMensalidades, getAlunoPorUsuarioId } from '@/services/storage';
 import { Mensalidade, StatusMensalidade } from '@/types';
-import { formatarValor, formatarData, nomeMes } from '@/lib/utils';
+import { formatarData, formatarValor, nomeMes } from '@/lib/utils';
 
-const STATUS_OPTIONS = [
+const STATUS_OPTIONS: { value: StatusMensalidade | ''; label: string }[] = [
   { value: '', label: 'Todos' },
   { value: 'pago', label: 'Pago' },
   { value: 'pendente', label: 'Pendente' },
@@ -39,46 +29,51 @@ const STATUS_OPTIONS = [
 export default function MinhasMensalidadesPage() {
   const router = useRouter();
   const { usuario } = useAuth();
+
+  const [carregando, setCarregando] = useState(true);
   const [mensalidades, setMensalidades] = useState<Mensalidade[]>([]);
   const [filtroStatus, setFiltroStatus] = useState<StatusMensalidade | ''>('');
-  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    if (usuario?.id) {
-      const aluno = getAlunoPorUsuarioId(usuario.id);
-      if (aluno) {
-        let dados = filtrarMensalidades({ alunoId: aluno.id });
+    if (!usuario?.id) return;
 
-        if (filtroStatus) {
-          dados = dados.filter(m => m.status === filtroStatus);
-        }
-
-        // Ordenar do mais recente para o mais antigo
-        dados.sort((a, b) => {
-          if (b.anoReferencia !== a.anoReferencia) {
-            return b.anoReferencia - a.anoReferencia;
-          }
-          return b.mesReferencia - a.mesReferencia;
-        });
-
-        setMensalidades(dados);
-      }
+    const aluno = getAlunoPorUsuarioId(usuario.id);
+    if (!aluno) {
+      setMensalidades([]);
       setCarregando(false);
+      return;
     }
+
+    let dados = filtrarMensalidades({ alunoId: aluno.id });
+    if (filtroStatus) {
+      dados = dados.filter((item) => item.status === filtroStatus);
+    }
+
+    dados.sort((a, b) => {
+      if (b.anoReferencia !== a.anoReferencia) return b.anoReferencia - a.anoReferencia;
+      return b.mesReferencia - a.mesReferencia;
+    });
+
+    setMensalidades(dados);
+    setCarregando(false);
   }, [usuario?.id, filtroStatus]);
 
-  const whatsappLink = () => {
-    const mensagem = encodeURIComponent('Olá! Sou aluno e gostaria de tirar uma dúvida sobre minha mensalidade.');
-    return `https://wa.me/5511999999999?text=${mensagem}`;
-  };
+  const totalPendente = useMemo(
+    () =>
+      mensalidades
+        .filter((item) => item.status === 'pendente' || item.status === 'atrasado')
+        .reduce((acc, item) => acc + item.valor, 0),
+    [mensalidades]
+  );
 
-  const totalPendente = mensalidades
-    .filter(m => m.status === 'pendente' || m.status === 'atrasado')
-    .reduce((acc, m) => acc + m.valor, 0);
+  const whatsappLink = useMemo(() => {
+    const mensagem = encodeURIComponent('Ola! Sou aluno e preciso de ajuda com minhas mensalidades.');
+    return `https://wa.me/5511999999999?text=${mensagem}`;
+  }, []);
 
   if (carregando) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute tipoRequerido="aluno">
         <AlunoLayout>
           <Loading />
         </AlunoLayout>
@@ -89,144 +84,87 @@ export default function MinhasMensalidadesPage() {
   return (
     <ProtectedRoute tipoRequerido="aluno">
       <AlunoLayout>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Receipt className="h-6 w-6 text-primary-600" />
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Minhas Mensalidades</h1>
-              </div>
-              <p className="text-gray-600 dark:text-gray-400">
-                Histórico completo de suas mensalidades
-              </p>
+        <div className="space-y-5">
+          <header>
+            <div className="flex items-center gap-2">
+              <Receipt className="h-6 w-6 text-primary-600" />
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Minhas mensalidades</h1>
             </div>
-          </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Acompanhe historico e status de pagamento.</p>
+          </header>
 
-          {/* Resumo */}
           {totalPendente > 0 && (
-            <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-              <CardBody className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                    <div>
-                      <p className="font-medium text-yellow-900 dark:text-yellow-100">
-                        Você tem {formatarValor(totalPendente)} em mensalidades pendentes
-                      </p>
-                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        Regularize o quanto antes para evitar problemas no transporte
-                      </p>
-                    </div>
-                  </div>
-                  <a
-                    href={whatsappLink()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Falar no WhatsApp
-                  </a>
+            <Card className="border-amber-200 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/20">
+              <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-semibold text-amber-900 dark:text-amber-100">Total em aberto: {formatarValor(totalPendente)}</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">Regularize para manter o transporte sem bloqueios.</p>
                 </div>
+                <Button variant="outline" onClick={() => window.open(whatsappLink, '_blank')}>
+                  <MessageCircle className="h-4 w-4" /> Falar no WhatsApp
+                </Button>
               </CardBody>
             </Card>
           )}
 
-          {/* Filtros */}
-          <Card>
-            <CardBody className="p-4">
-              <div className="flex flex-wrap gap-2">
-                {STATUS_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setFiltroStatus(opt.value as StatusMensalidade | '')}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                      filtroStatus === opt.value || (opt.value === '' && !filtroStatus)
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
+          <div className="flex flex-wrap gap-2">
+            {STATUS_OPTIONS.map((opt) => {
+              const ativo = (!filtroStatus && opt.value === '') || filtroStatus === opt.value;
+              const qtd = opt.value ? mensalidades.filter((item) => item.status === opt.value).length : mensalidades.length;
 
-          {/* Lista de Mensalidades */}
-          {mensalidades.length === 0 ? (
-            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-              <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Nenhuma mensalidade encontrada</h2>
-              <p className="text-gray-500">Aguarde o administrador configurar sua mensalidade.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {mensalidades.map((mensalidade) => (
-                <Card
-                  key={mensalidade.id}
-                  className={`border-l-4 ${
-                    mensalidade.status === 'pago'
-                      ? 'border-l-green-500'
-                      : mensalidade.status === 'pendente'
-                      ? 'border-l-yellow-500'
-                      : 'border-l-red-500'
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => setFiltroStatus(opt.value)}
+                  className={`min-h-[40px] rounded-full px-3 text-sm font-semibold transition ${
+                    ativo
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300'
                   }`}
                 >
-                  <CardBody className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-lg text-gray-900 dark:text-white">
-                            {nomeMes(mensalidade.mesReferencia)} {mensalidade.anoReferencia}
-                          </span>
-                          <Badge status={mensalidade.status} size="sm" />
-                        </div>
+                  {opt.label} ({qtd})
+                </button>
+              );
+            })}
+          </div>
 
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>Vencimento: {formatarData(mensalidade.dataVencimento)}</span>
-                          {mensalidade.dataPagamento && (
-                            <span>Pago em: {formatarData(mensalidade.dataPagamento)}</span>
-                          )}
-                        </div>
-
-                        {mensalidade.formaPagamento && (
-                          <p className="text-sm text-gray-500 mt-1">
-                            Forma: {mensalidade.formaPagamento.toUpperCase()}
-                          </p>
-                        )}
-
-                        {mensalidade.comprovante && (
-                          <div className="flex items-center gap-1 text-sm text-green-600 mt-1">
-                            <CheckCircle className="h-4 w-4" />
-                            Comprovante enviado em {formatarData(mensalidade.comprovante.dataEnvio)}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                          {formatarValor(mensalidade.valor)}
-                        </p>
-
-                        {mensalidade.status !== 'pago' && (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => router.push(`/aluno/comprovante/${mensalidade.id}`)}
-                            className="mt-2"
-                          >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Enviar Comprovante
-                          </Button>
-                        )}
-                      </div>
+          {!mensalidades.length ? (
+            <EmptyState
+              title="Nenhuma mensalidade encontrada"
+              description="Aguarde a configuracao do administrador."
+              icon={<Receipt className="h-12 w-12 text-gray-400" />}
+            />
+          ) : (
+            <section className="space-y-3">
+              {mensalidades.map((mensalidade) => (
+                <ListItem
+                  key={mensalidade.id}
+                  statusColor={mensalidade.status}
+                  title={
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span>{nomeMes(mensalidade.mesReferencia)} {mensalidade.anoReferencia}</span>
+                      <Badge status={mensalidade.status} size="sm" />
                     </div>
-                  </CardBody>
-                </Card>
+                  }
+                  subtitle={`Vencimento: ${formatarData(mensalidade.dataVencimento)}`}
+                  meta={
+                    mensalidade.dataPagamento
+                      ? `Pago em ${formatarData(mensalidade.dataPagamento)}${
+                          mensalidade.formaPagamento ? ` • ${mensalidade.formaPagamento.toUpperCase()}` : ''
+                        }`
+                      : 'Pagamento ainda nao registrado'
+                  }
+                  value={formatarValor(mensalidade.valor)}
+                  actions={
+                    mensalidade.status === 'pago' ? null : (
+                      <Button size="sm" onClick={() => router.push(`/aluno/comprovante/${mensalidade.id}`)}>
+                        <Upload className="h-4 w-4" /> Enviar comprovante
+                      </Button>
+                    )
+                  }
+                />
               ))}
-            </div>
+            </section>
           )}
         </div>
       </AlunoLayout>

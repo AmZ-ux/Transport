@@ -1,23 +1,22 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { UserCog, ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft, UserCog } from 'lucide-react';
 import {
-  Layout,
-  ProtectedRoute,
-  Card,
-  CardHeader,
-  CardBody,
+  AlunoFormSteps,
   Button,
-  Input,
-  Select,
+  Card,
+  CardBody,
+  CardHeader,
+  Layout,
   Loading,
+  ProtectedRoute,
 } from '@/components';
-import { getAlunoPorId } from '@/services/storage';
 import { useAlunos } from '@/hooks/useAlunos';
+import { getAlunoPorId } from '@/services/storage';
 import { Aluno } from '@/types';
-import { validarTelefone, formatarTelefone } from '@/lib/utils';
+import { formatarTelefone } from '@/lib/utils';
 
 export default function EditarAlunoPage() {
   const router = useRouter();
@@ -28,122 +27,55 @@ export default function EditarAlunoPage() {
   const [alunoOriginal, setAlunoOriginal] = useState<Aluno | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
-  const [erros, setErros] = useState<Record<string, string>>({});
-
-  const [form, setForm] = useState({
-    nome: '',
-    telefone: '',
-    endereco: '',
-    curso: '',
-    faculdade: '',
-    pontoEmbarque: '',
-    valorMensalidade: '',
-    diaVencimento: '5',
-    ativo: true,
-  });
+  const [erro, setErro] = useState('');
 
   useEffect(() => {
     const aluno = getAlunoPorId(alunoId);
-    if (aluno) {
-      setAlunoOriginal(aluno);
-      setForm({
-        nome: aluno.nome,
-        telefone: formatarTelefone(aluno.telefone),
-        endereco: aluno.endereco || '',
-        curso: aluno.curso,
-        faculdade: aluno.faculdade,
-        pontoEmbarque: aluno.pontoEmbarque,
-        valorMensalidade: String(aluno.valorMensalidade),
-        diaVencimento: String(aluno.diaVencimento),
-        ativo: aluno.ativo,
-      });
-    }
+    setAlunoOriginal(aluno);
     setCarregando(false);
   }, [alunoId]);
 
-  const validar = (): boolean => {
-    const novosErros: Record<string, string> = {};
-
-    if (!form.nome.trim()) {
-      novosErros.nome = 'Nome e obrigatorio';
-    }
-
-    if (!form.telefone.trim()) {
-      novosErros.telefone = 'Telefone e obrigatorio';
-    } else if (!validarTelefone(form.telefone)) {
-      novosErros.telefone = 'Telefone invalido';
-    }
-
-    if (!form.curso.trim()) {
-      novosErros.curso = 'Curso e obrigatorio';
-    }
-
-    if (!form.faculdade.trim()) {
-      novosErros.faculdade = 'Faculdade e obrigatoria';
-    }
-
-    if (!form.pontoEmbarque.trim()) {
-      novosErros.pontoEmbarque = 'Ponto de embarque e obrigatorio';
-    }
-
-    if (!form.valorMensalidade || Number(form.valorMensalidade) <= 0) {
-      novosErros.valorMensalidade = 'Valor invalido';
-    }
-
-    setErros(novosErros);
-    return Object.keys(novosErros).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validar() || !alunoOriginal) return;
+  const handleSubmit = async (values: {
+    nome: string;
+    telefone: string;
+    endereco: string;
+    curso: string;
+    faculdade: string;
+    pontoEmbarque: string;
+    valorMensalidade: string;
+    diaVencimento: string;
+    ativo: boolean;
+  }) => {
+    if (!alunoOriginal) return;
 
     setSalvando(true);
+    setErro('');
+
     try {
       atualizar({
         ...alunoOriginal,
-        nome: form.nome,
-        telefone: form.telefone.replace(/\D/g, ''),
-        endereco: form.endereco,
-        curso: form.curso,
-        faculdade: form.faculdade,
-        pontoEmbarque: form.pontoEmbarque,
-        valorMensalidade: Number(form.valorMensalidade),
-        diaVencimento: Number(form.diaVencimento),
-        ativo: form.ativo,
+        nome: values.nome,
+        telefone: values.telefone.replace(/\D/g, ''),
+        endereco: values.endereco,
+        curso: values.curso,
+        faculdade: values.faculdade,
+        pontoEmbarque: values.pontoEmbarque,
+        valorMensalidade: Number(values.valorMensalidade),
+        diaVencimento: Number(values.diaVencimento),
+        ativo: values.ativo,
       });
 
       router.push('/alunos');
     } catch {
-      setErros({ geral: 'Erro ao salvar aluno. Tente novamente.' });
+      setErro('Nao foi possivel atualizar. Tente novamente.');
     } finally {
       setSalvando(false);
     }
   };
 
-  const formatarInputTelefone = (valor: string) => {
-    const numeros = valor.replace(/\D/g, '');
-    if (numeros.length <= 10) {
-      return numeros.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
-    }
-    return numeros.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: name === 'telefone' ? formatarInputTelefone(value) : value,
-    }));
-    if (erros[name]) {
-      setErros(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
   if (carregando) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute tipoRequerido="admin">
         <Layout>
           <Loading />
         </Layout>
@@ -153,13 +85,17 @@ export default function EditarAlunoPage() {
 
   if (!alunoOriginal) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute tipoRequerido="admin">
         <Layout>
-          <div className="max-w-2xl mx-auto text-center py-12">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Aluno nao encontrado</h1>
-            <p className="text-gray-500 mb-4">O aluno que voce esta tentando editar nao existe.</p>
-            <Button onClick={() => router.push('/alunos')}>Voltar para Alunos</Button>
-          </div>
+          <Card>
+            <CardBody className="text-center">
+              <p className="font-semibold text-gray-900 dark:text-white">Aluno nao encontrado</p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Verifique se o cadastro ainda existe.</p>
+              <div className="mt-4">
+                <Button onClick={() => router.push('/alunos')}>Voltar</Button>
+              </div>
+            </CardBody>
+          </Card>
         </Layout>
       </ProtectedRoute>
     );
@@ -168,14 +104,9 @@ export default function EditarAlunoPage() {
   return (
     <ProtectedRoute tipoRequerido="admin">
       <Layout>
-        <div className="max-w-2xl mx-auto">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/alunos')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+        <div className="mx-auto max-w-2xl space-y-4">
+          <Button variant="ghost" onClick={() => router.push('/alunos')}>
+            <ArrowLeft className="h-4 w-4" /> Voltar
           </Button>
 
           <Card>
@@ -183,148 +114,31 @@ export default function EditarAlunoPage() {
               <div className="flex items-center gap-2">
                 <UserCog className="h-6 w-6 text-primary-600" />
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Editar Aluno
-                  </h1>
-                  <p className="text-sm text-gray-500">
-                    Atualize os dados do aluno {alunoOriginal.nome}.
-                  </p>
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">Editar aluno</h1>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Atualize o cadastro em 3 etapas.</p>
                 </div>
               </div>
             </CardHeader>
-
             <CardBody>
-              {erros.geral && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600">
-                  {erros.geral}
-                </div>
-              )}
+              {erro && <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{erro}</div>}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <Input
-                      label="Nome Completo"
-                      name="nome"
-                      value={form.nome}
-                      onChange={handleChange}
-                      error={erros.nome}
-                      required
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Input
-                      label="Telefone (WhatsApp)"
-                      name="telefone"
-                      value={form.telefone}
-                      onChange={handleChange}
-                      error={erros.telefone}
-                      required
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Input
-                      label="Endereco (opcional)"
-                      name="endereco"
-                      value={form.endereco}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div>
-                    <Input
-                      label="Curso"
-                      name="curso"
-                      value={form.curso}
-                      onChange={handleChange}
-                      error={erros.curso}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Input
-                      label="Faculdade"
-                      name="faculdade"
-                      value={form.faculdade}
-                      onChange={handleChange}
-                      error={erros.faculdade}
-                      required
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Input
-                      label="Ponto de Embarque"
-                      name="pontoEmbarque"
-                      value={form.pontoEmbarque}
-                      onChange={handleChange}
-                      error={erros.pontoEmbarque}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <Input
-                      label="Valor da Mensalidade"
-                      name="valorMensalidade"
-                      type="number"
-                      value={form.valorMensalidade}
-                      onChange={handleChange}
-                      error={erros.valorMensalidade}
-                      required
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
-
-                  <div>
-                    <Select
-                      label="Dia de Vencimento"
-                      name="diaVencimento"
-                      value={form.diaVencimento}
-                      onChange={handleChange}
-                      required
-                    >
-                      {Array.from({ length: 28 }, (_, i) => i + 1).map(dia => (
-                        <option key={dia} value={dia}>Dia {dia}</option>
-                      ))}
-                    </Select>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Select
-                      label="Status"
-                      name="ativo"
-                      value={String(form.ativo)}
-                      onChange={(e) => setForm(prev => ({ ...prev, ativo: e.target.value === 'true' }))}
-                    >
-                      <option value="true">Ativo</option>
-                      <option value="false">Inativo</option>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => router.push('/alunos')}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    loading={salvando}
-                    className="flex-1"
-                  >
-                    Salvar Alteracoes
-                  </Button>
-                </div>
-              </form>
+              <AlunoFormSteps
+                showStatusField
+                loading={salvando}
+                submitLabel="Salvar alteracoes"
+                initialValues={{
+                  nome: alunoOriginal.nome,
+                  telefone: formatarTelefone(alunoOriginal.telefone),
+                  endereco: alunoOriginal.endereco || '',
+                  curso: alunoOriginal.curso,
+                  faculdade: alunoOriginal.faculdade,
+                  pontoEmbarque: alunoOriginal.pontoEmbarque,
+                  valorMensalidade: String(alunoOriginal.valorMensalidade),
+                  diaVencimento: String(alunoOriginal.diaVencimento),
+                  ativo: alunoOriginal.ativo,
+                }}
+                onSubmit={handleSubmit}
+              />
             </CardBody>
           </Card>
         </div>
@@ -332,3 +146,4 @@ export default function EditarAlunoPage() {
     </ProtectedRoute>
   );
 }
+
